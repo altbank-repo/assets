@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body,
+    html {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #bootstrap-loader {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    .bs-spinner {
+      width: 24px;
+      height: 24px;
+      border: 2px solid #E4E4E4;
+      border-top-color: #9A9A9A;
+      border-radius: 50%;
+      animation: bs-spin 0.8s linear infinite;
+    }
+
+    @keyframes bs-spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="bootstrap-loader">
+    <div class="bs-spinner"></div>
+  </div>
+  <div id="inapp-root"></div>
+
+  <script>
+    (function () {
+
+      // =================================================================
+      // CONFIGURAÇÃO — edite apenas esta seção por campanha
+      // =================================================================
+      var INAPP_ID = "09_inapp-simples_tem-limite-bonus-te-esperando";
+      var GITHUB_RAW_BASE = "https://raw.githubusercontent.com/altbank-repo/assets/main/clevertap/inapps/novucard/";
+
+      // Parâmetros injetados pelo CleverTap (substitua pelos placeholders reais)
+      window.INAPP_PARAMS = {
+        identity: ""
+        // Adicione outros atributos aqui conforme necessário, ex:
+        // nome: "{{ct_nome}}"
+      };
+      // =================================================================
+
+      var startTime = Date.now();
+      var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+      // ---- helpers CleverTap (espelhados do inapp, necessários para o evento de loading) ----
+      function ctTrackEvent(eventName, props) {
+        if (isIOS) {
+          try {
+            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+              window.webkit.messageHandlers.clevertap.postMessage({
+                action: 'recordEventWithProps',
+                event: eventName,
+                properties: props
+              });
+            }
+          } catch (e) { }
+        } else {
+          try {
+            if (window.CleverTap && typeof window.CleverTap.pushEvent === 'function') {
+              window.CleverTap.pushEvent(eventName, JSON.stringify(props));
+            }
+          } catch (e) { }
+        }
+      }
+
+      function dispatchLoadEvent(sucesso) {
+        var elapsed = (Date.now() - startTime) / 1000;
+        var tempoCarregamento = Math.round(elapsed * 10) / 10; // 1 casa decimal
+        ctTrackEvent('Inapp - TESTE', {
+          'inapp-id': INAPP_ID,
+          'sucesso-ao-carregar': sucesso,
+          'tempo-carregamento': tempoCarregamento
+        });
+      }
+
+      function hideLoader() {
+        var loader = document.getElementById('bootstrap-loader');
+        if (loader) loader.style.display = 'none';
+      }
+
+      function injectContent(html) {
+        var root = document.getElementById('inapp-root');
+        root.innerHTML = html;
+        // innerHTML não executa scripts — precisa recriar cada tag <script>
+        root.querySelectorAll('script').forEach(function (old) {
+          var s = document.createElement('script');
+          s.text = old.text;
+          document.body.appendChild(s);
+        });
+      }
+
+      var url = GITHUB_RAW_BASE + INAPP_ID + ".html?t=" + Date.now();
+
+      fetch(url)
+        .then(function (r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.text();
+        })
+        .then(function (html) {
+          hideLoader();
+          injectContent(html);
+          dispatchLoadEvent(true);
+        })
+        .catch(function (e) {
+          console.error('[Bootstrapper] Erro ao carregar inapp:', e);
+          hideLoader();
+          dispatchLoadEvent(false);
+        });
+
+    })();
+  </script>
+</body>
+
+</html>
