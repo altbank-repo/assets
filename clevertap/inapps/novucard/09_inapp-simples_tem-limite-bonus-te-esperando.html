@@ -4,139 +4,690 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Inapp Interstitial - Template 2 DS Applied</title>
+
   <style>
+        /* ==========================================================
+           2. DESIGN SYSTEM (ÁREA DE TROCA)
+           ========================================================== */
+    :root {
+      /* --- Variável Específica deste Layout --- */
+      --header-padding-top: 32px;
+      /* ==========================================================
+     COLOR PRIMITIVES (Palette Definition)
+     Valores hexadecimais brutos da marca.
+     ========================================================== */
+
+      /* --- Accent --- */
+      --Brand-Accent-Accent-Darker-Extra: #5F6600;
+      --Brand-Accent-Accent-Darker: #98A300;
+      --Brand-Accent-Accent-Dark: #D1E000;
+      --Brand-Accent-Accent: #EDFF00;
+      --Brand-Accent-Accent-Light: #F4FF5C;
+      --Brand-Accent-Accent-Lighter: #F7FF85;
+      --Brand-Accent-Accent-Lighter-Extra: #FBFFC2;
+
+      /* --- Action --- */
+      --Brand-Action-Action-Darker-Extra: #5F6600;
+      --Brand-Action-Action-Darker: #98A300;
+      --Brand-Action-Action-Dark: #D1E000;
+      --Brand-Action-Action: #EDFF00;
+      --Brand-Action-Action-Light: #F4FF5C;
+      --Brand-Action-Action-Lighter: #F7FF85;
+      --Brand-Action-Action-Lighter-Extra: #FBFFC2;
+
+      /* --- Card --- */
+      --Brand-Card-Card-Darker-Extra: #5F6600;
+      --Brand-Card-Card-Darker: #98A300;
+      --Brand-Card-Card-Dark: #D1E000;
+      --Brand-Card-Card: #EDFF00;
+      --Brand-Card-Card-Light: #F4FF5C;
+      --Brand-Card-Card-Lighter: #F7FF85;
+      --Brand-Card-Card-Lighter-Extra: #FBFFC2;
+
+      /* --- Support --- */
+      --Brand-Support-Support-Darker-Extra: #014862;
+      --Brand-Support-Support-Darker: #016B94;
+      --Brand-Support-Support-Dark: #02A4DE;
+      --Brand-Support-Support: #02B3F6;
+      --Brand-Support-Support-Light: #5DD3FD;
+      --Brand-Support-Support-Lighter: #86DEFE;
+      --Brand-Support-Support-Lighter-Extra: #C2EEFE;
+
+      /* --- Miscellaneous (Misc) --- */
+      --Brand-Miscellaneous-Misc-Darker-Extra: #3D0066;
+      --Brand-Miscellaneous-Misc-Darker: #6200A3;
+      --Brand-Miscellaneous-Misc-Dark: #8700E0;
+      --Brand-Miscellaneous-Misc: #9A00FF;
+      --Brand-Miscellaneous-Misc-Light: #BE5CFF;
+      --Brand-Miscellaneous-Misc-Lighter: #CE85FF;
+      --Brand-Miscellaneous-Misc-Lighter-Extra: #E7C2FF;
+
+      /* --- Status: Green --- */
+      --Brand-Status-Green-Green-Darker-Extra: #225200;
+      --Brand-Status-Green-Green-Darker: #3B8F00;
+      --Brand-Status-Green-Green-Dark: #55CC00;
+      --Brand-Status-Green-Green: #66F200;
+      --Brand-Status-Green-Green-Light: #94FF47;
+      --Brand-Status-Green-Green-Lighter: #ACFF70;
+      --Brand-Status-Green-Green-Lighter-Extra: #CFFFAD;
+
+      /* --- Status: Orange --- */
+      --Brand-Status-Orange-Orange-Darker-Extra: #8F4500;
+      --Brand-Status-Orange-Orange-Darker: #A34F00;
+      --Brand-Status-Orange-Orange-Dark: #C65F00;
+      --Brand-Status-Orange-Orange: #EB7100;
+      --Brand-Status-Orange-Orange-Light: #F99C47;
+      --Brand-Status-Orange-Orange-Lighter: #FFBA4C;
+      --Brand-Status-Orange-Orange-Lighter-Extra: #FFCF81;
+
+      /* --- Status: Red --- */
+      --Brand-Status-Red-Red-Darker-Extra: #810E1E;
+      --Brand-Status-Red-Red-Darker: #990B1E;
+      --Brand-Status-Red-Red-Dark: #C30E26;
+      --Brand-Status-Red-Red: #E71834;
+      --Brand-Status-Red-Red-Light: #FF4747;
+      --Brand-Status-Red-Red-Lighter: #FF6060;
+      --Brand-Status-Red-Red-Lighter-Extra: #FFA1A1;
+
+      /* --- Neutral --- */
+      --Brand-Neutral-Black-Darker: #0D0D0D;
+      --Brand-Neutral-Black-Dark: #222222;
+      --Brand-Neutral-Black: #404040;
+      --Brand-Neutral-Black-Light: #6F6F6F;
+      --Brand-Neutral-Black-Lighter: #9A9A9A;
+      --Brand-Neutral-Grey-Darker: #C4C4C4;
+      --Brand-Neutral-Grey-Dark: #D9D9D9;
+      --Brand-Neutral-Grey: #E4E4E4;
+      --Brand-Neutral-Grey-Light: #F4F4F4;
+      --Brand-Neutral-Grey-Lighter: #F8F8F8;
+      --Brand-Neutral-White: #FFFFFF;
+
+      /* --- Branding Specifics (Novücard Alt Bank) --- */
+      /* Cores primárias de identidade */
+      --Style-Branding-Safety-Yellow: #EDFF00;
+      --Style-Branding-Green: #66F200;
+      --Style-Branding-Blue: #02B3F6;
+      --Style-Branding-Purple: #9A00FF;
+      --Style-Branding-Pink: #FF00B1;
+
+      /* Cores secundárias de identidade */
+      --Style-Branding-Black: #404040;
+      --Style-Branding-Novu-Grey: #9A9A9A;
+      --Style-Branding-Novu-Grey-Light: #C4C4C4;
+      --Style-Branding-White: #FFFFFF;
+
+      /* Gradients */
+      --Style-Branding-Rainbow-Linear: linear-gradient(90deg, #EDFF00 0%, #FF00B1 20%, #9A00FF 40%, #02B3F6 60%, #66F200 80%, #EDFF00 100%);
+
+      /* --- Shades (Opacity Variants) --- */
+      --App-Shades-Black-80: rgba(13, 13, 13, 0.80);
+      --App-Shades-Black-60: rgba(13, 13, 13, 0.60);
+      --App-Shades-Black-40: rgba(13, 13, 13, 0.40);
+      --App-Shades-Black-20: rgba(13, 13, 13, 0.20);
+      --App-Shades-Black-10: rgba(13, 13, 13, 0.10);
+
+      /* --- Social Colors --- */
+      --Social-Colors-WhatsApp: #24D366;
+      --Social-Colors-Pix: #32BCAD;
+
+
+      /* ==========================================================
+     SEMANTIC TOKENS (Contextual Usage)
+     Apontam para os primitivos. Use estes no desenvolvimento.
+     ========================================================== */
+
+      /* --- Branding Usage --- */
+      --Branding-Brand-Color: var(--Brand-Card-Card);
+      --Branding-On-Brand-Color: var(--Brand-Neutral-Black);
+      --Branding-Credit-Card-Illustration-1: var(--Brand-Card-Card);
+      --Branding-Credit-Card-Illustration-2: var(--Brand-Card-Card-Darker);
+
+      /* --- App / Buttons --- */
+      --App-Buttons-Primary-Action: var(--Brand-Action-Action);
+      --App-Buttons-On-Primary-Action: var(--Brand-Neutral-Black);
+
+      /* --- App / Visual Elements --- */
+      --App-Card-Visual-Elements-Physical-Card: var(--Brand-Card-Card);
+      --App-Card-Visual-Elements-Virtual-Card: var(--Brand-Card-Card-Lighter);
+      --App-Card-Visual-Elements-Card-Outline: var(--Brand-Card-Card-Dark);
+
+      /* --- App / Interaction --- */
+      --App-Interaction-Link: var(--Brand-Support-Support);
+      --App-Interaction-Primary-Text: var(--Brand-Neutral-Black);
+      --App-Interaction-Secondary-Text: var(--Brand-Neutral-Black-Light);
+      --App-Interaction-Selected-Field: var(--Brand-Accent-Accent-Lighter-Extra);
+
+      /* --- App / Highlights --- */
+      --App-Highlights-Neutral: var(--Brand-Accent-Accent);
+      --App-Highlights-Alert: var(--Brand-Status-Orange-Orange-Lighter-Extra);
+      --App-Highlights-Danger: var(--Brand-Status-Red-Red-Lighter-Extra);
+
+      /* --- App / Limits --- */
+      --App-Limits-Aprovado: var(--Brand-Support-Support-Light);
+      --App-Limits-Aprovado-Selected: var(--Brand-Support-Support-Lighter);
+      --App-Limits-Bonus: var(--Brand-Miscellaneous-Misc-Lighter);
+      --App-Limits-Bonus-Selected: var(--Brand-Miscellaneous-Misc-Lighter-Extra);
+      --App-Limits-Consignado: var(--Brand-Status-Orange-Orange-Light);
+      --App-Limits-Consignado-Selected: var(--Brand-Status-Orange-Orange-Lighter-Extra);
+
+
+      /* ==========================================================
+     TYPOGRAPHY CONFIG
+     ========================================================== */
+
+      --font-principal: 'Nunito', 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --font-secundaria: 'Roboto', -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+
+
+      /* ==========================================================
+     DIMENSIONS & ELEVATION
+     ========================================================== */
+
+      /* --- Spacing Scale --- */
+      --Spacing-0: 0px;
+      --Spacing-4: 4px;
+      --Spacing-8: 8px;
+      --Spacing-12: 12px;
+      --Spacing-16: 16px;
+      --Spacing-20: 20px;
+      --Spacing-24: 24px;
+      --Spacing-28: 28px;
+      --Spacing-32: 32px;
+      --Spacing-36: 36px;
+      --Spacing-40: 40px;
+      --Spacing-44: 44px;
+      --Spacing-48: 48px;
+      --Spacing-52: 52px;
+      --Spacing-56: 56px;
+      --Spacing-60: 60px;
+      --Spacing-64: 64px;
+      --Spacing-68: 68px;
+      --Spacing-72: 72px;
+      --Spacing-76: 76px;
+      --Spacing-80: 80px;
+
+      /* --- Radius --- */
+      --Radius-0: 0px;
+      --Radius-2: 2px;
+      --Radius-4: 4px;
+      --Radius-8: 8px;
+      --Radius-12: 12px;
+      --Radius-16: 16px;
+      --Radius-100: 100px;
+
+      /* --- Border Width --- */
+      --Border-Width-0: 0px;
+      --Border-Width-1: 1px;
+      --Border-Width-2: 2px;
+      --Border-Width-4: 4px;
+
+      /* --- Shadows --- */
+      --Shadow-Button-Overflow-Glow: 0px 0px 0px 20px rgba(255, 255, 255, 0.30), 0px 0px 40px 40px white, 0px 3px 5px rgba(66, 66, 66, 0.15);
+      --Shadow-Stacked-Button-Upper: 0px 2px 20px rgba(66, 66, 66, 0.25);
+      --Shadow-Soft: 0px 4px 4px rgba(66, 66, 66, 0.10);
+      --Shadow-Card-Drop: 0px 1px 3px rgba(0, 0, 0, 0.20), 0px 2px 1px rgba(0, 0, 0, 0.12), 0px 1px 1px rgba(0, 0, 0, 0.14);
+      --Shadow-Dropdown-Menu: 0px 5px 5px rgba(0, 0, 0, 0.20), 0px 3px 14px rgba(0, 0, 0, 0.12), 0px 8px 10px rgba(0, 0, 0, 0.14);
+
+    }
+
+    /* <--- Fim do :root (DS) */
+
+
+    /* ==========================================================
+           3. CLASSES DE TIPOGRAFIA (DS)
+           ========================================================== */
+
+    /* Heading 4 Medium */
+    .heading-4-medium {
+      font-family: var(--font-principal);
+      font-size: 24px;
+      line-height: 1.3;
+      font-weight: 500;
+    }
+
+    /* Body 1 Regular */
+    .body-1-regular {
+      font-family: var(--font-secundaria);
+      font-size: 16px;
+      line-height: 1.3;
+      font-weight: 400;
+    }
+
+    /* Body 2 Bold (Usada no botão) */
+    .body-2-bold {
+      font-family: var(--font-secundaria);
+      font-size: 14px;
+      line-height: 1.4;
+      font-weight: 700;
+    }
+
+    /* Caption Regular (Usada no Footer Note) */
+    .caption-regular {
+      font-family: var(--font-secundaria);
+      font-size: 12px;
+      line-height: 1.4;
+      font-weight: 400;
+    }
+
+    /* ==========================================================
+           4. ESTRUTURA E LAYOUT
+           ========================================================== */
+
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
     }
 
     body,
     html {
+      font-family: var(--font-secundaria);
+      margin: 0;
+      padding: 0;
       width: 100%;
       height: 100%;
+      background-color: transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* --- CARD --- */
+    .card {
+      background: var(--Brand-Neutral-White);
+      width: 88%;
+      max-width: 350px;
+      border-radius: var(--Radius-16);
+      overflow: hidden;
+      /* Sombra fixa solicitada */
+      box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- HEADER --- */
+    .header {
+      position: relative;
+      width: 100%;
+      height: auto;
+      background-color: var(--Brand-Accent-Accent-Lighter-Extra);
+      display: block;
+      padding: 0;
+    }
+
+    .header-image {
+      display: block;
+      width: 100%;
+      height: auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      z-index: 2;
+      padding-top: var(--header-padding-top);
+    }
+
+    .header-title {
+      margin-top: 0;
+      color: var(--App-Interaction-Primary-Text);
+      width: 85%;
+      text-align: center;
+      line-height: 1.1;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 10;
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
       background: transparent;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      border: 0;
+      padding: 0;
+      text-decoration: none;
     }
 
-    #bootstrap-loader {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100%;
-      height: 100%;
-    }
-
-    .bs-spinner {
+    .close-icon-img {
       width: 24px;
       height: 24px;
-      border: 2px solid #E4E4E4;
-      border-top-color: #9A9A9A;
-      border-radius: 50%;
-      animation: bs-spin 0.8s linear infinite;
+      opacity: 0.5;
+      display: block;
     }
 
-    @keyframes bs-spin {
-      to {
-        transform: rotate(360deg);
-      }
+    .content {
+      padding: var(--Spacing-24);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: var(--Spacing-16);
     }
+
+    .description {
+      color: var(--App-Interaction-Primary-Text);
+      text-align: center;
+      margin: 0;
+    }
+
+    /* Footer Note (Texto pequeno abaixo do botão) */
+    .footer-note {
+      /* Usando token semântico para texto secundário (cinza) */
+      color: var(--App-Interaction-Secondary-Text);
+      text-align: center;
+      margin: 0;
+      /* Font controlada por .caption-regular */
+    }
+
+    /* --- Botão CTA --- */
+    .cta-button {
+      /* Cor e Forma */
+      background-color: var(--App-Buttons-Primary-Action);
+      color: var(--App-Buttons-On-Primary-Action);
+      border-radius: var(--Radius-100);
+
+      /* Layout */
+      display: inline-block;
+      padding: 12px 32px;
+      text-align: center;
+      text-decoration: none;
+
+      /* Comportamento */
+      box-shadow: none;
+      transition: opacity 0.2s;
+
+      /* Ajuste específico para remover uppercase do DS */
+      text-transform: none;
+
+      /* OBS: A tipografia virá da classe .body-2-bold no HTML */
+    }
+
+    .cta-button:active {
+      opacity: 0.8;
+    }
+
+    strong,
+    b {
+      font-weight: 700;
+    }
+
+    .img-load-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .img-load-spinner {
+      width: 18px; height: 18px;
+      border: 2px solid var(--Brand-Neutral-Grey-Light);
+      border-top-color: var(--Brand-Neutral-Black-Lighter);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      position: absolute;
+      pointer-events: none;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 
 <body>
 
-  <div id="bootstrap-loader">
-    <div class="bs-spinner"></div>
+  <div class="card">
+    <div class="header">
+      <img id="uiHeaderImage" src="" alt="Ilustração" class="header-image" style="opacity:0; transition: opacity 0.3s;">
+
+      <div class="header-overlay">
+        <div id="closeButton" class="close-btn" role="button" tabindex="0">
+          <img id="uiCloseIcon" src="" alt="Fechar" class="close-icon-img">
+        </div>
+        <h1 id="uiTitle" class="header-title heading-4-medium"></h1>
+      </div>
+    </div>
+
+    <div class="content">
+      <p id="uiDescription" class="description body-1-regular"></p>
+
+      <a href="#" id="ctaButton" class="cta-button body-2-bold"></a>
+
+      <p id="uiFooterNote" class="footer-note caption-regular"></p>
+    </div>
   </div>
-  <div id="inapp-root"></div>
 
   <script>
     (function () {
-
       // =================================================================
-      // CONFIGURAÇÃO — edite apenas esta seção por campanha
+      // [ÁREA DE CONFIGURAÇÃO DE CONTEÚDO]
       // =================================================================
-      var INAPP_ID = "09_inapp-simples_tem-limite-bonus-te-esperando";
-      var GITHUB_RAW_BASE = "https://raw.githubusercontent.com/altbank-repo/assets/main/clevertap/inapps/novucard/";
 
-      // Parâmetros injetados pelo CleverTap (substitua pelos placeholders reais)
-      window.INAPP_PARAMS = {
-        identity: ""
-        // Adicione outros atributos aqui conforme necessário, ex:
-        // nome: "{{ct_nome}}"
+      const CONFIG = {
+        // CONFIGURAÇÃO DE COMPORTAMENTO POR SISTEMA
+        // Opções disponíveis: 'deeplink', 'external', 'close'
+        actions: {
+          android: 'deeplink',
+          ios: 'deeplink'
+        },
+        images: {
+          main: "https://assets.novucard.com.br/images/inapp_tem-limite-bonus-te-esperando.svg",
+          closeIcon: "https://assets.novucard.com.br/images/icon_x.svg"
+        },
+        text: {
+          title: "Tem Limite Bônus te esperando!",
+          description: "Pague sua fatura no valor total antes do vencimento e garanta Limite Bônus.",
+          footerNote: "Não se aplica ao parcelamento de fatura"
+        },
+        button: {
+          label: "Pagar fatura",
+          url: "https://www.novucard.com.br/app/billing/",
+          eventName: "button_clicked_pagar-fatura"
+        },
+
+        analytics: {
+          enabled: false,
+          eventName: "Inapp _ Viewed",
+          params: {
+            clickedCta: "clicou-cta"
+          }
+           },
+            fonts: [
+               "https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700&display=swap",
+               "https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap"
+            ]
       };
+
+      // Parâmetros recebidos do bootstrapper
+      // window.INAPP_PARAMS é definido pelo bootstrapper antes de injetar este código
+      var params = window.INAPP_PARAMS || {};
+      // Exemplo de uso: CONFIG.text.title = "Olá, " + params.nome + "!";
+
+         if (CONFIG.fonts && CONFIG.fonts.length > 0) {
+            CONFIG.fonts.forEach(function(fontUrl) {
+               var fontLink = document.createElement('link');
+               fontLink.rel = 'stylesheet';
+               fontLink.href = fontUrl;
+               document.head.appendChild(fontLink);
+            });
+         }
+
+      // =================================================================
+      // [LÓGICA DO TEMPLATE]
       // =================================================================
 
-      var startTime = Date.now();
+      function setupTemplate() {
+        loadImg('uiHeaderImage', CONFIG.images.main);
+        document.getElementById('uiCloseIcon').src = CONFIG.images.closeIcon;
+        document.getElementById('uiTitle').innerHTML = CONFIG.text.title;
+        document.getElementById('uiDescription').innerHTML = CONFIG.text.description;
+        document.getElementById('uiFooterNote').innerHTML = CONFIG.text.footerNote;
+
+        const btn = document.getElementById('ctaButton');
+        btn.innerText = CONFIG.button.label;
+        btn.href = CONFIG.button.url;
+        btn.setAttribute("data-wzrk-c2a", CONFIG.button.eventName);
+      }
+
+      setupTemplate();
+
+      // =================================================================
+      // [CLEVERTAP HELPERS]
+      // =================================================================
+
       var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
-      // ---- helpers CleverTap (espelhados do inapp, necessários para o evento de loading) ----
-      function ctTrackEvent(eventName, props) {
-        if (isIOS) {
-          try {
-            if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
-              window.webkit.messageHandlers.clevertap.postMessage({
-                action: 'recordEventWithProps',
-                event: eventName,
-                properties: props
-              });
-            }
-          } catch (e) { }
-        } else {
-          try {
-            if (window.CleverTap && typeof window.CleverTap.pushEvent === 'function') {
-              window.CleverTap.pushEvent(eventName, JSON.stringify(props));
-            }
-          } catch (e) { }
+      var ctTrackEvent = function(eventName, props) {
+          if (isIOS) {
+              try {
+                  if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+                      window.webkit.messageHandlers.clevertap.postMessage({
+                          action: 'recordEventWithProps',
+                          event: eventName,
+                          properties: props
+                      });
+                  }
+              } catch (e) { console.error("Erro no tracking iOS", e); }
+          } else {
+              try {
+                  if (window.CleverTap && typeof window.CleverTap.pushEvent === "function") {
+                      window.CleverTap.pushEvent(eventName, JSON.stringify(props));
+                  }
+              } catch (e) { console.error("Erro no tracking Android", e); }
+          }
+      };
+
+      var flushFinalEvents = function (isCtaClick) {
+        if (CONFIG.analytics.enabled) {
+          var props = {};
+          props[CONFIG.analytics.params.clickedCta] = !!isCtaClick;
+          ctTrackEvent(CONFIG.analytics.eventName, props);
         }
+      };
+
+      var ctDismiss = function () {
+        try {
+          if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+            window.webkit.messageHandlers.clevertap.postMessage({ action: 'dismissInAppNotification' });
+            return true;
+          }
+        } catch (e) {}
+        try {
+          if (window.CleverTap && typeof window.CleverTap.dismissInAppNotification === "function") {
+            window.CleverTap.dismissInAppNotification();
+            return true;
+          }
+        } catch (e) {}
+        return false;
+      };
+
+      var ctTriggerAction = function (url, c2a, btnId, isTrackingOnly) {
+        try {
+          if (window.CleverTap && typeof window.CleverTap.triggerInAppAction === "function") {
+            var kvData = isTrackingOnly ? {} : { "wzrk_dl": url };
+            var actionJson = { "type": "kv", "kv": kvData };
+            window.CleverTap.triggerInAppAction(JSON.stringify(actionJson), c2a, btnId);
+            return true;
+          }
+        } catch (e) { }
+        return false;
+      };
+
+      function loadImg(id, src, wrapperId) {
+        var img = document.getElementById(id);
+        if (!img) return;
+        img.style.opacity = '0';
+        var done = function () {
+          img.style.opacity = '1';
+          if (wrapperId) {
+            var s = document.querySelector('#' + wrapperId + ' .img-load-spinner');
+            if (s) s.style.display = 'none';
+          }
+        };
+        img.onload = done;
+        img.onerror = done;
+        img.src = src;
+      }
+      function resetAndLoadImg(id, src, wrapperId) {
+        if (wrapperId) {
+          var s = document.querySelector('#' + wrapperId + ' .img-load-spinner');
+          if (s) s.style.display = 'block';
+        }
+        loadImg(id, src, wrapperId);
       }
 
-      function dispatchLoadEvent(sucesso) {
-        var elapsed = (Date.now() - startTime) / 1000;
-        var tempoCarregamento = Math.round(elapsed * 10) / 10; // 1 casa decimal
-        ctTrackEvent('Inapp - TESTE', {
-          'inapp-id': INAPP_ID,
-          'sucesso-ao-carregar': sucesso,
-          'tempo-carregamento': tempoCarregamento
-        });
-      }
+      // =================================================================
+      // [LISTENERS DE CLIQUE]
+      // =================================================================
 
-      function hideLoader() {
-        var loader = document.getElementById('bootstrap-loader');
-        if (loader) loader.style.display = 'none';
-      }
+      document.getElementById("closeButton")?.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        flushFinalEvents(false);
+        ctDismiss();
+      });
 
-      function injectContent(html) {
-        var root = document.getElementById('inapp-root');
-        root.innerHTML = html;
-        // innerHTML não executa scripts — precisa recriar cada tag <script>
-        root.querySelectorAll('script').forEach(function (old) {
-          var s = document.createElement('script');
-          s.text = old.text;
-          document.body.appendChild(s);
-        });
-      }
+      // BOTÃO CTA (PRIMÁRIO)
+      document.getElementById("ctaButton")?.addEventListener("click", function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+        flushFinalEvents(true);
 
-      var url = GITHUB_RAW_BASE + INAPP_ID + ".html?t=" + Date.now();
+        var url = this.getAttribute("href");
+        var c2a = this.getAttribute("data-wzrk-c2a");
+        var actionType = isIOS ? CONFIG.actions.ios : CONFIG.actions.android;
 
-      fetch(url)
-        .then(function (r) {
-          if (!r.ok) throw new Error('HTTP ' + r.status);
-          return r.text();
-        })
-        .then(function (html) {
-          hideLoader();
-          injectContent(html);
-          dispatchLoadEvent(true);
-        })
-        .catch(function (e) {
-          console.error('[Bootstrapper] Erro ao carregar inapp:', e);
-          hideLoader();
-          dispatchLoadEvent(false);
-        });
+        if (isIOS) {
+          if (actionType === 'external') {
+            var newWindow = window.open(url, '_blank');
+            if (!newWindow || newWindow.closed) {
+              setTimeout(function() { window.location.href = url; }, 150);
+              setTimeout(function() { ctDismiss(); }, 300);
+            }
+            setTimeout(function () {
+              window.location.href = "wzrk://?wzrk_c2a=" + encodeURIComponent(c2a);
+            }, 1000);
+          }
+          else if (actionType === 'close') {
+            window.location.href = "wzrk://?wzrk_c2a=" + encodeURIComponent(c2a);
+          }
+          else {
+                       if (ctTriggerAction(url, c2a, "ctaButton", false)) {
+             setTimeout(function () { ctDismiss(); }, 150);
+           } else {
+             setTimeout(function() { window.location.href = url; }, 150);
+             setTimeout(function() { ctDismiss(); }, 300);
+           }
+          }
+        } else {
+          if (actionType === 'external') {
+            ctTriggerAction(url, c2a, "ctaButton", true);
+            var newWindow = window.open(url, '_blank');
+            if (!newWindow || newWindow.closed) {
+              setTimeout(function() { window.top.location.href = url; }, 150);
+            }
+            setTimeout(function () { ctDismiss(); }, 1500);
+          }
+          else if (actionType === 'deeplink') {
+            if (ctTriggerAction(url, c2a, "ctaButton", false)) {
+              setTimeout(function () { ctDismiss(); }, 150);
+            }
+          }
+          else {
+            ctTriggerAction(url, c2a, "ctaButton", true);
+            setTimeout(function () { ctDismiss(); }, 150);
+          }
+        }
+      });
 
     })();
   </script>
