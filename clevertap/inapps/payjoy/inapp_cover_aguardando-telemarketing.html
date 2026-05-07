@@ -1,0 +1,2426 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+    <title>Atualização de Endereço - Payjoy (Final v4)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            overflow: hidden;
+            background-color: transparent !important;
+            font-family: var(--font-secundaria);
+        }
+
+        .main-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: env(safe-area-inset-top, 20px);
+            padding-bottom: env(safe-area-inset-bottom, 20px);
+            overflow: hidden;
+            transition: align-items 0.2s ease, padding-top 0.2s ease;
+        }
+
+        .cover-container {
+            width: 90%;
+            max-width: 400px;
+            height: auto;
+            max-height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--Brand-Neutral-White);
+            border-radius: var(--Radius-16);
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+        }
+
+        .cover-container.intro-mode {
+            width: 90% !important;
+            max-width: 400px !important;
+            margin: auto;
+            border-radius: 16px !important;
+        }
+
+        .header {
+            display: flex;
+            justify-content: flex-end;
+            padding: 8px 8px 0 0;
+            flex-shrink: 0;
+            background: var(--Brand-Neutral-White);
+            border-top-left-radius: var(--Radius-16);
+            border-top-right-radius: var(--Radius-16);
+        }
+
+        .close-btn {
+            width: 40px;
+            height: 40px;
+            padding: 10px;
+            opacity: 0.5;
+            cursor: pointer;
+            background: none;
+            border: none;
+        }
+
+        .close-btn img {
+            width: 20px;
+            height: 20px;
+            display: block;
+        }
+
+        .slide {
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100%;
+            padding: 0 4px 16px 24px;
+        }
+
+        .slide.active {
+            display: flex;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .form-content {
+            flex: 1;
+            width: 100%;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 20px;
+            overscroll-behavior-y: contain;
+            padding-right: 20px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .footer-actions {
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding-bottom: 16px;
+            padding-top: 10px;
+            background: var(--Brand-Neutral-White);
+            padding-right: 24px;
+        }
+
+        .title {
+            color: var(--App-Interaction-Primary-Text);
+            text-align: left;
+            margin: 0 0 30px 0;
+            padding-right: 24px;
+        }
+
+        #t-intro {
+            padding-right: 0 !important;
+        }
+
+        label,
+        .rev-label {
+            display: block;
+            color: var(--Brand-Neutral-Black-Light);
+            margin-bottom: 6px;
+            font-family: var(--font-secundaria);
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            padding-right: 40px;
+            border: 1px solid var(--Brand-Neutral-Grey);
+            border-radius: var(--Radius-4);
+            background: transparent;
+            font-family: var(--font-secundaria);
+            font-size: 16px !important;
+            font-weight: 400;
+            line-height: 1.3;
+            color: var(--App-Interaction-Primary-Text);
+            -webkit-appearance: none;
+            transition: border-color 0.2s ease;
+            box-sizing: border-box;
+        }
+
+        textarea {
+            height: 100px;
+            resize: none;
+            padding-right: 12px;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border: 1px solid var(--Brand-Neutral-Black-Dark) !important;
+            outline: none;
+        }
+
+        input.input-error,
+        textarea.input-error {
+            border: 1px solid var(--Brand-Status-Red-Red) !important;
+        }
+
+        ::placeholder {
+            opacity: 1;
+            color: var(--Brand-Neutral-Grey-Darker);
+        }
+
+        input:disabled,
+        input[readonly].system-disabled,
+        .system-disabled {
+            border: 1px solid var(--Brand-Neutral-Grey) !important;
+            background-color: var(--Brand-Neutral-Grey-Light) !important;
+            color: var(--Brand-Neutral-Black-Lighter) !important;
+            cursor: default !important;
+            pointer-events: none !important;
+            -webkit-text-fill-color: var(--Brand-Neutral-Black-Lighter) !important;
+            opacity: 1;
+        }
+
+        .system-disabled:focus,
+        input:disabled:focus {
+            border: 1px solid var(--Brand-Neutral-Grey) !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        .char-count-msg {
+            color: var(--Brand-Status-Red-Red);
+            margin-top: 6px;
+            display: none;
+        }
+
+        .error-msg {
+            color: var(--Brand-Status-Red-Red);
+            font-size: 13px;
+            margin-top: 8px;
+            display: none;
+            text-align: center;
+        }
+
+        .main-wrapper.keyboard-open {
+            align-items: center !important;
+            padding-bottom: 0 !important;
+            padding-top: env(safe-area-inset-top, 10px) !important;
+        }
+
+        .main-wrapper.keyboard-open .cover-container {
+            max-height: 100% !important;
+            border-radius: var(--Radius-16) !important;
+        }
+
+        .info-text {
+            color: var(--App-Interaction-Secondary-Text);
+            font-style: italic;
+            margin-top: 8px;
+            margin-bottom: 0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+            position: relative;
+        }
+
+        .row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .autocomplete-suggestions::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .autocomplete-suggestions::-webkit-scrollbar-thumb {
+            background-color: #CCC;
+            border-radius: 10px;
+        }
+
+        .autocomplete-suggestions {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--Brand-Neutral-White);
+            border-radius: var(--Radius-4);
+            z-index: 1000;
+            max-height: 220px;
+            overflow-y: auto;
+            box-shadow: var(--Shadow-Dropdown-Menu);
+        }
+
+        .suggestion-item {
+            padding: 16px 12px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--Brand-Neutral-Grey-Light);
+        }
+
+        .suggestion-item:hover {
+            background-color: var(--Brand-Neutral-Grey-Lighter);
+        }
+
+        .suggestion-item b {
+            color: var(--App-Interaction-Primary-Text);
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .suggestion-item span {
+            color: var(--App-Interaction-Secondary-Text);
+            display: block;
+            font-size: 12px;
+        }
+
+        .suggestion-item .search-cep-item {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 15px;
+            color: #000;
+            font-weight: 700;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 12px;
+            font-family: var(--font-secundaria);
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 1.3;
+            color: var(--App-Interaction-Primary-Text);
+            cursor: pointer;
+            user-select: none;
+            width: fit-content;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            margin: 0;
+            cursor: pointer;
+            flex-shrink: 0;
+            border: none;
+            background-color: transparent;
+            background-image: var(--img-checkbox-square);
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .checkbox-group input[type="checkbox"]:checked {
+            background-color: transparent;
+        }
+
+        .checkbox-group input[type="checkbox"]:checked::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 7px;
+            background-image: var(--img-checkbox-check);
+            background-repeat: no-repeat;
+            background-position: center;
+            background-size: contain;
+            display: block;
+        }
+
+        .checkbox-group input[type="checkbox"]:focus,
+        .checkbox-group input[type="checkbox"]:active {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        .cep-edit-container,
+        .search-input-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .pencil-btn,
+        .clear-btn {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+        }
+
+        .spinner-loader {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--Brand-Neutral-Grey-Light);
+            border-top-color: var(--Brand-Neutral-Black-Lighter);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            margin-top: -9px;
+            z-index: 11;
+            display: none;
+        }
+
+        .pencil-btn img {
+            width: 24px;
+            height: 24px;
+            opacity: 1;
+            filter: brightness(1);
+        }
+
+        #inputCepDisplay,
+        #searchRua {
+            padding-right: 30px;
+        }
+
+        #inputCepDisplay {
+            background-color: transparent !important;
+            color: var(--App-Interaction-Primary-Text) !important;
+            cursor: pointer;
+            border-color: var(--Brand-Neutral-Grey);
+            pointer-events: auto;
+        }
+
+        #rev_cep,
+        #rev_num,
+        #rev_comp,
+        #rev_ref,
+        #rev_transporte,
+        #rev_rua:not(.system-disabled),
+        #rev_bairro:not(.system-disabled),
+        #rev_cidade:not(.system-disabled),
+        #rev_uf:not(.system-disabled) {
+            background-color: transparent !important;
+            color: var(--App-Interaction-Primary-Text) !important;
+            cursor: pointer;
+            border-color: var(--Brand-Neutral-Grey);
+            pointer-events: auto;
+        }
+
+        .clear-btn img {
+            width: 18px;
+            height: 18px;
+            opacity: 0.6;
+            display: block;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 16px 18px;
+            border: 1px solid var(--Brand-Neutral-Grey);
+            margin-top: -1px;
+            cursor: pointer;
+            background-color: var(--Brand-Neutral-White);
+            transition: background-color 0.2s;
+            position: relative;
+        }
+
+        .radio-option:first-child {
+            border-top-left-radius: var(--Radius-4);
+            border-top-right-radius: var(--Radius-4);
+            margin-top: 0;
+        }
+
+        .radio-option:last-child {
+            border-bottom-left-radius: var(--Radius-4);
+            border-bottom-right-radius: var(--Radius-4);
+        }
+
+        .radio-option.selected {
+            background-color: var(--Brand-Accent-Accent-Lighter-Extra);
+            z-index: 1;
+        }
+
+        .radio-option input[type="radio"] {
+            display: none;
+        }
+
+        .custom-radio-circle {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--Brand-Neutral-Grey-Darker);
+            border-radius: 50%;
+            margin-right: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: white;
+            flex-shrink: 0;
+        }
+
+        .custom-radio-circle::after {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background-color: var(--Brand-Neutral-Black);
+            border-radius: 50%;
+            display: none;
+        }
+
+        .radio-option.selected .custom-radio-circle {
+            border-color: var(--Brand-Neutral-Black);
+        }
+
+        .radio-option.selected .custom-radio-circle::after {
+            display: block;
+        }
+
+        .radio-text {
+            font-family: var(--font-secundaria);
+            font-size: 16px;
+            font-weight: 400;
+            color: var(--App-Interaction-Primary-Text);
+        }
+
+        .review-box {
+            background: var(--Brand-Neutral-Grey-Light);
+            border-radius: var(--Radius-8);
+            padding: 16px;
+        }
+
+        .review-item {
+            display: flex;
+            flex-direction: column;
+            border-bottom: none;
+            padding-bottom: 12px;
+            margin-bottom: 12px;
+        }
+
+        .review-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .cta-primary {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--App-Buttons-Primary-Action);
+            color: var(--App-Buttons-On-Primary-Action);
+            font-family: var(--font-secundaria);
+            font-size: 16px;
+            font-weight: 700;
+            padding: 14px;
+            border-radius: var(--Radius-100);
+            width: 100%;
+            border: none;
+            cursor: pointer;
+            text-transform: none;
+        }
+
+        .cta-primary:disabled {
+            background-color: var(--Brand-Neutral-Grey-Light) !important;
+            color: var(--Brand-Neutral-Grey-Darker) !important;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .btn-link-edit {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: var(--font-secundaria);
+            font-size: 16px;
+            font-weight: 700;
+            width: fit-content;
+            padding: 14px 20px;
+            margin: 0 auto;
+            border-radius: var(--Radius-100);
+            border: none;
+            cursor: pointer;
+            text-transform: none;
+            background-color: var(--Brand-Neutral-Grey-Light);
+            color: var(--Brand-Neutral-Black);
+        }
+
+        .btn-link-edit:disabled {
+            color: var(--Brand-Neutral-Grey-Darker) !important;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .help-link {
+            display: block;
+            text-align: left;
+            margin-top: 10px;
+            text-decoration: none;
+            cursor: pointer;
+            color: var(--App-Interaction-Link);
+            font-family: var(--font-secundaria);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .help-link.disabled {
+            color: var(--Brand-Neutral-Black-Lighter) !important;
+            pointer-events: none;
+            opacity: 1;
+            cursor: default;
+        }
+
+        .btn-spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--Brand-Neutral-Grey-Light);
+            border-top-color: var(--Brand-Neutral-Black-Lighter);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        .img-load-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .img-load-spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--Brand-Neutral-Grey-Light);
+            border-top-color: var(--Brand-Neutral-Black-Lighter);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            position: absolute;
+            pointer-events: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-box {
+            width: 85%;
+            max-width: 320px;
+            background: var(--Brand-Neutral-White);
+            border-radius: var(--Radius-16);
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-title {
+            font-family: var(--font-principal);
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--App-Interaction-Primary-Text);
+            margin: 0 0 12px 0;
+        }
+
+        .modal-msg {
+            font-family: var(--font-secundaria);
+            font-size: 15px;
+            color: var(--App-Interaction-Secondary-Text);
+            line-height: 1.5;
+            margin: 0 0 24px 0;
+        }
+
+        .modal-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .progress-container {
+            height: 4px;
+            background-color: var(--Brand-Neutral-Grey);
+            margin: 0 24px 20px 24px;
+            border-radius: 2px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--Brand-Action-Action);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        #step2-address-context {
+            display: none;
+            color: var(--Brand-Neutral-Black-Light);
+            margin-top: 0;
+            margin-bottom: 8px;
+            padding-right: 24px;
+            font-weight: 500;
+        }
+
+        select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px !important;
+        }
+
+        #t-step7 {
+            padding-right: 0 !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="main-wrapper">
+        <div class="cover-container intro-mode">
+            <div id="exitModal" class="modal-overlay">
+                <div class="modal-box">
+                    <h3 class="modal-title" id="mod-title"></h3>
+                    <p class="modal-msg" id="mod-msg"></p>
+                    <div class="modal-actions">
+                        <button class="cta-primary" id="btn-stay" onclick="stayOnApp()"></button>
+                        <button class="btn-link-edit" id="btn-exit" onclick="handleExitClick()"></button>
+                    </div>
+                </div>
+            </div>
+
+            <header class="header">
+                <button class="close-btn" onclick="tryClose()">
+                    <img id="imgClose" src="" alt="Fechar">
+                </button>
+            </header>
+
+            <div id="progBarBox" class="progress-container">
+                <div id="progBarFill" class="progress-bar-fill"></div>
+            </div>
+
+            <div class="slide active" id="stepIntro">
+                <div class="form-content"
+                    style="text-align: center; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%;">
+                    <h1 class="title heading-4-regular" id="t-intro" style="text-align: center; margin-bottom: 20px;">
+                    </h1>
+                    <div class="img-load-wrapper" id="wrapIntro"
+                        style="width: 100%; min-height: 30px; margin-bottom: 24px;">
+                        <div class="img-load-spinner"></div>
+                        <img id="imgIntro" src=""
+                            style="width: 100%; height: auto; opacity: 0; transition: opacity 0.3s;">
+                    </div>
+                    <p id="d-intro" class="body-1-regular"
+                        style="text-align: center; color: var(--App-Interaction-Primary-Text); margin: 0;"></p>
+                </div>
+                <div class="footer-actions">
+                    <button id="btnIntroPri" class="cta-primary" onclick="handleIntroPrimary()"></button>
+                </div>
+            </div>
+
+            <div class="slide" id="step0">
+                <div class="form-content">
+                    <h1 class="title heading-4-regular" id="t-step0"></h1>
+                    <div class="form-group">
+                        <input type="tel" id="inputCepOrigin" maxlength="8" oninput="handleCepInput(this)"
+                            onclick="handleUserCepClick(this)">
+                        <span class="help-link link-medium" id="l-dontknow" onclick="handleDontKnowCep()"></span>
+                    </div>
+                </div>
+                <div class="footer-actions">
+                    <div id="cepFeedback" class="error-msg body-2-medium" style="margin: 0; text-align: center;"></div>
+
+                    <button id="btnCepContinuar" class="cta-primary" onclick="fetchCep()" disabled></button>
+                </div>
+            </div>
+
+            <div class="slide" id="stepSearch">
+                <h1 class="title heading-4-regular" id="t-stepSearch"></h1>
+                <div class="form-content">
+                    <div class="form-group" style="position: relative;">
+                        <label id="lbl-uf" class="body-2-regular"></label>
+                        <input type="text" id="inputUFDisplay" maxlength="2" oninput="handleStateInput(this)"
+                            onfocus="openStateDropdown()" onclick="openStateDropdown()" autocomplete="off">
+                        <div id="stateList" class="autocomplete-suggestions" style="display:none;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label id="lbl-city" class="body-2-regular"></label>
+                        <input type="text" id="searchCidade" autocomplete="off" oninput="handleCityInput(this)">
+                        <div id="citySuggestions" class="autocomplete-suggestions" style="display:none;"></div>
+                    </div>
+                    <div class="form-group">
+                        <label id="lbl-street-search" class="body-2-regular"></label>
+                        <div class="search-input-container">
+                            <input type="text" id="searchRua" autocomplete="off" oninput="handleStreetInput(this)"
+                                onfocus="handleStreetFocus(this)">
+                            <button id="btnClearStreet" class="clear-btn" onclick="clearStreetField()">
+                                <img id="imgClear" src="" alt="Limpar">
+                            </button>
+                            <div id="loaderStreet" class="spinner-loader"></div>
+                        </div>
+                        <div id="streetSuggestions" class="autocomplete-suggestions" style="display:none;"></div>
+                    </div>
+                </div>
+                <div class="footer-actions">
+                    <button class="cta-primary" id="btnExecSearch" onclick="proceedFromSearch()" disabled></button>
+                    <button class="btn-link-edit" id="btnBackSearch" onclick="goToStep(0)"></button>
+                </div>
+            </div>
+
+            <div class="slide" id="step1">
+                <h1 class="title heading-4-regular" id="t-step1"></h1>
+                <div class="form-content">
+                    <div class="form-group">
+                        <label id="lbl-cep" class="body-2-regular"></label>
+                        <div class="cep-edit-container">
+                            <input type="text" id="inputCepDisplay" readonly onclick="goToStep(0)"
+                                onmousedown="event.preventDefault()">
+
+                            <button class="pencil-btn" onclick="goToStep(0)">
+                                <img id="imgEdit" src="" alt="Editar">
+                            </button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label id="lbl-street" class="body-2-regular"></label>
+                        <input type="text" id="inputRua" oninput="validateStep1()" onfocus="scrollToInput('inputRua')"
+                            onclick="scrollToInput('inputRua')">
+                    </div>
+                    <div class="form-group">
+                        <label id="lbl-neigh" class="body-2-regular"></label>
+                        <input type="text" id="inputBairro" oninput="validateStep1()"
+                            onfocus="scrollToInput('inputBairro')" onclick="scrollToInput('inputBairro')">
+                    </div>
+                    <div class="row">
+                        <div style="flex:3;">
+                            <label id="lbl-city-disp" class="body-2-regular"></label>
+                            <input type="text" id="inputCidade" readonly class="system-disabled"
+                                oninput="validateStep1()" onfocus="scrollToInput('inputCidade')"
+                                onclick="scrollToInput('inputCidade')">
+                        </div>
+                        <div style="flex:1.2; position: relative;">
+                            <label id="lbl-uf-disp" class="body-2-regular"></label>
+                            <input type="text" id="inputEstado" maxlength="2" readonly class="system-disabled"
+                                autocomplete="off" oninput="handleStateInputStep1(this)"
+                                onfocus="openStateDropdownStep1()" onclick="openStateDropdownStep1()">
+                            <div id="stateListStep1" class="autocomplete-suggestions" style="display:none;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-actions">
+                    <button id="btnStep1" class="cta-primary" onclick="goToStep(2)" disabled></button>
+                </div>
+            </div>
+
+            <div class="slide" id="step2">
+                <p id="step2-address-context" class="body-2-regular"></p>
+
+                <h1 class="title heading-4-regular" id="t-step2"></h1>
+
+                <div class="form-content">
+                    <div class="form-group">
+                        <input type="text" id="inputNum" oninput="validateStep2()">
+                        <label class="checkbox-group body-1-regular">
+                            <input type="checkbox" id="noNum" onchange="toggleNum(this)">
+                            <span id="chk-nonum"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="footer-actions">
+                    <button id="btnStep2" class="cta-primary" onclick="goToStep(3)" disabled></button>
+                    <button class="btn-link-edit" id="btnBack2" onclick="goToStep(1)"></button>
+                </div>
+            </div>
+
+            <div class="slide" id="step3">
+                <h1 class="title heading-4-regular" id="t-step3"></h1>
+                <div class="form-content">
+                    <div class="form-group">
+                        <input type="text" id="inputComp" oninput="validateStep3()">
+                        <label class="checkbox-group body-1-regular">
+                            <input type="checkbox" id="noComp" onchange="toggleComp(this)">
+                            <span id="chk-nocomp"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="footer-actions">
+                    <button id="btnStep3" class="cta-primary" onclick="goToStep(4)" disabled></button>
+                    <button class="btn-link-edit" id="btnBack3" onclick="goToStep(2)"></button>
+                </div>
+            </div>
+
+            <div class="slide" id="step4">
+                <h1 class="title heading-4-regular" id="t-step4"></h1>
+                <div class="form-content">
+                    <div class="form-group">
+                        <textarea id="inputRef" oninput="validateStep4()" placeholder=""></textarea>
+                        <p class="info-text caption-regular" id="legend-ref"></p>
+                    </div>
+                </div>
+                <div class="footer-actions">
+                    <p id="refFeedback" class="char-count-msg body-2-medium" style="margin: 0; text-align: center;"></p>
+
+                    <button id="btnStep4" class="cta-primary" onclick="goToStep(5)" disabled></button>
+                    <button class="btn-link-edit" id="btnBack4" onclick="goToStep(3)"></button>
+                </div>
+            </div>
+
+            <div class="slide" id="step5">
+                <h1 class="title heading-4-regular" id="t-step5"></h1>
+                <div class="form-content">
+                    <div class="form-group">
+                        <div class="radio-group">
+                            <div class="radio-option" onclick="selectTransport(this)">
+                                <div class="custom-radio-circle"></div>
+                                <input type="radio" name="transporte" value="Correios">
+                                <span class="radio-text">Correios</span>
+                            </div>
+                            <div class="radio-option" onclick="selectTransport(this)">
+                                <div class="custom-radio-circle"></div>
+                                <input type="radio" name="transporte" value="Transportadora">
+                                <span class="radio-text">Transportadora</span>
+                            </div>
+                            <div class="radio-option" onclick="selectTransport(this)">
+                                <div class="custom-radio-circle"></div>
+                                <input type="radio" name="transporte" value="Ambos">
+                                <span class="radio-text">Ambos</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer-actions">
+                    <button id="btnReview" class="cta-primary" onclick="renderReview()" disabled></button>
+                    <button class="btn-link-edit" id="btnBack5" onclick="goToStep(4)"></button>
+                </div>
+            </div>
+
+            <div class="slide" id="step6">
+                <h1 class="title heading-4-regular" id="t-step6"></h1>
+                <div class="form-content">
+
+                    <div class="form-group">
+                        <label class="body-2-regular">CEP</label>
+                        <div class="cep-edit-container">
+                            <input type="text" id="rev_cep" readonly onclick="goToStep(0)"
+                                onmousedown="event.preventDefault()">
+                            <button class="pencil-btn" onclick="goToStep(0)"><img class="img-edit-review" src=""
+                                    alt="Editar"></button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div style="flex: 2.5;"> <label class="body-2-regular">Logradouro</label>
+                            <div class="cep-edit-container" id="rev_rua_box">
+                                <input type="text" id="rev_rua" readonly onmousedown="event.preventDefault()">
+                                <button class="pencil-btn" id="rev_rua_btn"><img class="img-edit-review" src=""
+                                        alt="Editar"></button>
+                            </div>
+                        </div>
+                        <div style="flex: 1;"> <label class="body-2-regular">Número</label>
+                            <div class="cep-edit-container">
+                                <input type="text" id="rev_num" readonly onclick="goToStep(2)"
+                                    onmousedown="event.preventDefault()">
+                                <button class="pencil-btn" onclick="goToStep(2)"><img class="img-edit-review" src=""
+                                        alt="Editar"></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="body-2-regular">Complemento</label>
+                        <div class="cep-edit-container">
+                            <input type="text" id="rev_comp" readonly onclick="goToStep(3)"
+                                onmousedown="event.preventDefault()">
+                            <button class="pencil-btn" onclick="goToStep(3)"><img class="img-edit-review" src=""
+                                    alt="Editar"></button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="body-2-regular">Bairro</label>
+                        <div class="cep-edit-container" id="rev_bairro_box">
+                            <input type="text" id="rev_bairro" readonly onmousedown="event.preventDefault()">
+                            <button class="pencil-btn" id="rev_bairro_btn"><img class="img-edit-review" src=""
+                                    alt="Editar"></button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div style="flex: 3;">
+                            <label class="body-2-regular">Cidade</label>
+                            <div class="cep-edit-container" id="rev_cidade_box">
+                                <input type="text" id="rev_cidade" readonly class="system-disabled"
+                                    onmousedown="event.preventDefault()">
+                                <button class="pencil-btn" id="rev_cidade_btn" style="display: none;"><img
+                                        class="img-edit-review" src="" alt="Editar"></button>
+                            </div>
+                        </div>
+                        <div style="flex: 1.2;">
+                            <label class="body-2-regular">UF</label>
+                            <div class="cep-edit-container" id="rev_uf_box">
+                                <input type="text" id="rev_uf" readonly class="system-disabled"
+                                    onmousedown="event.preventDefault()">
+                                <button class="pencil-btn" id="rev_uf_btn" style="display: none;"><img
+                                        class="img-edit-review" src="" alt="Editar"></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="body-2-regular">Ponto de Referência</label>
+                        <div class="cep-edit-container">
+                            <input type="text" id="rev_ref" readonly onclick="goToStep(4)"
+                                onmousedown="event.preventDefault()">
+                            <button class="pencil-btn" onclick="goToStep(4)"><img class="img-edit-review" src=""
+                                    alt="Editar"></button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="body-2-regular">Recebe por</label>
+                        <div class="cep-edit-container">
+                            <input type="text" id="rev_transporte" readonly onclick="goToStep(5)"
+                                onmousedown="event.preventDefault()">
+                            <button class="pencil-btn" onclick="goToStep(5)"><img class="img-edit-review" src=""
+                                    alt="Editar"></button>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="footer-actions">
+                    <button id="btnConfirm" class="cta-primary" onclick="confirmAddress()"></button>
+                </div>
+            </div>
+
+            <div class="slide" id="step7">
+                <div class="form-content" style="text-align:center; padding-top:10px;">
+                    <div class="img-load-wrapper" id="wrapSuccess"
+                        style="width:100px; height:100px; margin: 0 auto 15px;">
+                        <div class="img-load-spinner"></div>
+                        <img id="imgSuccess" src=""
+                            style="width:100%; height:auto; opacity:0; transition: opacity 0.3s;">
+                    </div>
+                    <h1 class="title heading-4-regular" id="t-step7" style="text-align: center;"></h1>
+                    <p id="msg-success" class="body-1-regular"
+                        style="text-align: center; color: var(--App-Interaction-Primary-Text);"></p>
+                </div>
+                <div class="footer-actions">
+                    <button id="ctaFinal" class="cta-primary" onclick="ctDismiss()"></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        var params = window.INAPP_PARAMS || {};
+        const CT_INJECTED_IDENTITY                 = params.identity                || "";
+        const CT_INJECTED_CODIGO_RASTREIO_FLASH    = params.codigoRastreioFlash     || "";
+        const CT_INJECTED_CODIGO_RASTREIO_CORREIOS = params.codigoRastreioCorreios  || "";
+        const CT_INJECTED_MOTIVO_DE_DEVOLUCAO      = params.motivoDeDevolucao       || "";
+
+        // =================================================================
+        // [FIREBASE CONFIG]
+        // =================================================================
+        const FIREBASE_PROJECT_ID = "clevertap-form-resposes";
+        const FIREBASE_API_KEY    = "AIzaSyC2eYXz0RT1NGGUAS1NSh45HjsIgaUxrLc";
+
+        let wasSaveSuccessful = false;
+        let storedCepRaw = "";
+        let storedCepFormatted = "";
+        let isAutoClick = false;
+        let isAddressComplete = false;
+        let isOfflineMode = false;
+        let apiFailureCount = 0;
+        let searchFailureCount = 0;
+        let viacepApiStatus = "on";
+        let ibgeApiStatus = "on";
+        let qtdCliquesNaoSeiCep = 0;
+        let isCepUnico = false;
+
+        const CONFIG = {
+            api: {
+                collection: "PayJoy _ Aguardando Telemarketing - Inapp"
+            },
+            images: {
+                close: "https://assets.novucard.com.br/images/icon_x.svg",
+                clear: "https://assets.novucard.com.br/images/icon_x.svg",
+                edit: "https://assets.novucard.com.br/images/Icon_edit-alt.svg",
+                success: "https://assets.novucard.com.br/images/sucessfull-check.svg",
+                error: "https://assets.novucard.com.br/images/attention.svg",
+                intro: "https://app.payjoy.com.br/images/inapp_formulario_aguardando-telemarketing.svg",
+                checkboxSquare: "https://assets.novucard.com.br/images/icon_square.svg",
+                checkboxCheck: "https://assets.novucard.com.br/images/icon_check.svg"
+            },
+            text: {
+                exitModal: {
+                    title: "Deseja sair?",
+                    msg: "Se você sair agora, perderá os dados informados.",
+                    btnStay: "Continuar preenchendo",
+                    btnExit: "Sair mesmo assim"
+                },
+                intro: {
+                    title: "Problema na entrega do seu cartão",
+                    desc: "Para realizarmos o reenvio, nos envie seu endereço completo e atualizado, por favor",
+                    btnPri: "Enviar endereço",
+                    btnSec: "Deixar para depois",
+                    c2aPri: "forms_ag-telemkt_button_clicked_enviar-endereco",
+                    iosDeepLinkVersion: 1,
+                    actions: { android: 'close', ios: 'close' },
+                    url: ""
+                },
+                step0: { title: "Qual é seu CEP?", placeholder: "00000000", link: "Não sei meu CEP", btn: "Continuar" },
+                search: { title: "Buscar CEP", labels: { uf: "Estado (UF)", city: "Cidade", street: "Logradouro" }, placeholders: { uf: "UF", city: "Cidade", street: "Ex: Rua, Avenida, Praça, etc" }, btn: "Continuar", back: "Voltar" },
+                step1: { title: "Seu endereço está certo?", labels: { cep: "CEP", street: "Logradouro", neigh: "Bairro", city: "Cidade", uf: "Estado" }, placeholders: { street: "Nome da rua/avenida", neigh: "Seu bairro" }, btn: "Está certo" },
+                step2: { title: "Qual o número do endereço?", placeholder: "123", check: "Sem número", btn: "Continuar", back: "Voltar", noNumValue: "S/N" },
+                step3: { title: "Algum complemento?", placeholder: "Ex: Bloco C, Apto 301 / Quadra 3, Lote 58", check: "Nenhum complemento", btn: "Continuar", back: "Voltar", noCompValue: "Sem complemento" },
+                step4: { title: "Adicione um ponto de referência", placeholder: "Ex: Casa amarela. Em frente ao Restaurante X", legend: "O ponto de referência irá nos ajudar a encontrar seu endereço", btn: "Continuar", back: "Voltar" },
+                step5: { title: "Por onde você costuma receber suas encomendas?", btn: "Revisar endereço", back: "Voltar" },
+                step6: { title: "Está tudo certo?", btn: "Enviar endereço", back: "Não, quero corrigir" },
+                step7: {
+                    title: "Agradecemos o envio!",
+                    msg: "Em breve seu cartão será reenviado e entraremos em contato te informando",
+                    btn: "Ok, entendi",
+                    titleError: "Algo deu errado",
+                    msgError: "Não foi possível salvar seu endereço. Você poderá tentar novamente mais tarde.",
+                    btnError: "Ok, entendi",
+                    c2aSuccess: "forms_ag-telemkt_button_clicked_ok-entendi_sucesso",
+                    c2aError: "forms_ag-telemkt_button_clicked_ok-entendi_erro-api",
+                    iosDeepLinkVersion: 1,
+                    actions: {
+                        android: 'deeplink',
+                        ios: 'deeplink'
+                    },
+                    url: "payjoy://open/app/credit-card/home"
+                }
+            }
+        };
+
+        function handleIntroPrimary() {
+            document.querySelector('.cover-container').classList.remove('intro-mode');
+            goToStep(0);
+        }
+
+        function handleFinalCta(e) {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
+
+            var finalC2a = wasSaveSuccessful ? CONFIG.text.step7.c2aSuccess : CONFIG.text.step7.c2aError;
+            var configStep7 = CONFIG.text.step7;
+            var url = configStep7.url || "";
+
+            var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            var actionType = isIOS ? configStep7.actions.ios : configStep7.actions.android;
+
+            if (isIOS) {
+                if (actionType === 'external') {
+                    var newWindow = window.open(url, '_blank');
+                    if (!newWindow || newWindow.closed || typeof newWindow.closed == 'undefined') {
+                        window.location.href = url;
+                    }
+                    setTimeout(function () {
+                        window.location.href = "wzrk://?wzrk_c2a=" + encodeURIComponent(finalC2a);
+                    }, 1000);
+                }
+                else if (actionType === 'close') {
+                    window.location.href = "wzrk://?wzrk_c2a=" + encodeURIComponent(finalC2a);
+                }
+                else {
+                    if (configStep7.iosDeepLinkVersion === 1) {
+                        if (ctTriggerAction(url, finalC2a, "ctaFinal", false)) {
+                            setTimeout(function () { ctDismiss(); }, 150);
+                        } else {
+                            window.location.href = url;
+                        }
+                    } else {
+                        window.location.href = "wzrk://?wzrk_c2a=" + encodeURIComponent(finalC2a) + "&wzrk_dl=" + encodeURIComponent(url);
+                    }
+                }
+            } else {
+                if (actionType === 'external') {
+                    ctTriggerAction(url, finalC2a, "ctaFinal", true);
+                    window.location.href = url;
+                    setTimeout(function () { ctDismiss(); }, 2000);
+                }
+                else if (actionType === 'deeplink') {
+                    if (ctTriggerAction(url, finalC2a, "ctaFinal", false)) {
+                        setTimeout(function () { ctDismiss(); }, 150);
+                    }
+                }
+                else {
+                    ctTriggerAction(url, finalC2a, "ctaFinal", true);
+                    setTimeout(function () { ctDismiss(); }, 150);
+                }
+            }
+        }
+
+        const statesData = [{ s: 'AC' }, { s: 'AL' }, { s: 'AP' }, { s: 'AM' }, { s: 'BA' }, { s: 'CE' }, { s: 'DF' }, { s: 'ES' }, { s: 'GO' }, { s: 'MA' }, { s: 'MT' }, { s: 'MS' }, { s: 'MG' }, { s: 'PA' }, { s: 'PB' }, { s: 'PR' }, { s: 'PE' }, { s: 'PI' }, { s: 'RJ' }, { s: 'RN' }, { s: 'RS' }, { s: 'RO' }, { s: 'RR' }, { s: 'SC' }, { s: 'SP' }, { s: 'SE' }, { s: 'TO' }];
+        let citiesList = [], searchTimeout = null, selectedSearchResult = null;
+
+        // =================================================================
+        // DS INJECTION — não edite esta seção
+        // =================================================================
+        var DS_ID  = 'payjoy-ds';
+        var DS_URL = 'https://raw.githubusercontent.com/altbank-repo/assets/main/clevertap/inapps/payjoy/DS-payjoy.css';
+
+        function initInapp() {
+            initApp();
+
+            if (window.visualViewport) {
+                const handleResize = () => {
+                    const wrapper = document.querySelector('.main-wrapper');
+                    const height = window.visualViewport.height;
+                    const totalHeight = window.innerHeight;
+
+                    if (height < totalHeight * 0.85) {
+                        wrapper.classList.add('keyboard-open');
+                        wrapper.style.height = `${height}px`;
+                        wrapper.style.top = '0px';
+                        window.scrollTo(0, 0);
+                    } else {
+                        wrapper.classList.remove('keyboard-open');
+                        wrapper.style.height = '100%';
+                    }
+                };
+                window.visualViewport.addEventListener('resize', handleResize);
+                window.visualViewport.addEventListener('scroll', handleResize);
+            }
+
+            document.addEventListener('click', (e) => {
+                const inputUfSearch = document.getElementById('inputUFDisplay');
+                if (inputUfSearch) {
+                    const containerSearch = inputUfSearch.parentElement;
+                    if (!containerSearch.contains(e.target)) {
+                        const listBusca = document.getElementById('stateList');
+                        if (listBusca) listBusca.style.display = 'none';
+                    }
+                }
+
+                const inputEstadoManual = document.getElementById('inputEstado');
+                if (inputEstadoManual) {
+                    const containerManual = inputEstadoManual.parentElement;
+                    if (!containerManual.contains(e.target)) {
+                        const listManual = document.getElementById('stateListStep1');
+                        if (listManual) listManual.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        if (!document.getElementById(DS_ID)) {
+            // Standalone (navegador): DS ainda não existe, injeta
+            fetch(DS_URL + '?t=' + Date.now())
+                .then(function (r) {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.text();
+                })
+                .then(function (css) {
+                    var style = document.createElement('style');
+                    style.id = DS_ID;
+                    style.textContent = css;
+                    document.head.appendChild(style);
+                })
+                .catch(function (e) {
+                    console.error('[Inapp] Falha ao carregar DS:', e);
+                    // Exibe o inapp mesmo assim para facilitar debug no navegador
+                })
+                .finally(function () {
+                    initInapp();
+                });
+        } else {
+            // Produção via bootstrapper: DS já foi injetado, renderiza direto
+            initInapp();
+        }
+
+        var ctDismiss = function () {
+            try {
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+                    window.webkit.messageHandlers.clevertap.postMessage({ action: 'dismissInAppNotification' });
+                    return true;
+                }
+            } catch (e) { }
+            try {
+                if (window.CleverTap && typeof window.CleverTap.dismissInAppNotification === "function") {
+                    window.CleverTap.dismissInAppNotification();
+                    return true;
+                }
+            } catch (e) { }
+            return false;
+        };
+
+        var ctTriggerAction = function (url, c2a, btnId, isTrackingOnly) {
+            try {
+                if (window.CleverTap && typeof window.CleverTap.triggerInAppAction === "function") {
+                    var kvData = isTrackingOnly ? {} : { "wzrk_dl": url };
+                    var actionJson = { "type": "kv", "kv": kvData };
+                    window.CleverTap.triggerInAppAction(JSON.stringify(actionJson), c2a, btnId);
+                    return true;
+                }
+            } catch (e) { console.error("Erro ao disparar ação CleverTap:", e); }
+            return false;
+        };
+
+        var ctTrackEvent = function (eventName, props) {
+            var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+            if (isIOS) {
+                try {
+                    if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+                        window.webkit.messageHandlers.clevertap.postMessage({
+                            action: 'recordEventWithProps',
+                            event: eventName,
+                            properties: props // iOS aceita o objeto diretamente
+                        });
+                    }
+                } catch (e) { console.error("Erro no tracking iOS", e); }
+            } else {
+                try {
+                    if (window.CleverTap && typeof window.CleverTap.pushEvent === "function") {
+                        window.CleverTap.pushEvent(eventName, JSON.stringify(props));
+                    }
+                } catch (e) { console.error("Erro no tracking Android", e); }
+            }
+        };
+
+        function tryClose() {
+            if (document.getElementById('stepIntro').classList.contains('active') ||
+                document.getElementById('step7').classList.contains('active')) {
+                ctDismiss();
+            } else {
+                document.getElementById('exitModal').style.display = 'flex';
+            }
+        }
+
+        function stayOnApp() {
+            document.getElementById('exitModal').style.display = 'none';
+        }
+
+        function handleExitClick() {
+            ctDismiss();
+        }
+
+        function handleDontKnowCep() {
+            qtdCliquesNaoSeiCep++; // Soma 1 a cada clique
+            goToStep('Search');
+        }
+
+        function loadImg(id, src, wrapperId) {
+            var img = document.getElementById(id);
+            if (!img) return;
+            img.style.opacity = '0';
+            var done = function () {
+                img.style.opacity = '1';
+                if (wrapperId) {
+                    var s = document.querySelector('#' + wrapperId + ' .img-load-spinner');
+                    if (s) s.style.display = 'none';
+                }
+            };
+            img.onload = done;
+            img.onerror = done;
+            img.src = src;
+        }
+
+        function resetAndLoadImg(id, src, wrapperId) {
+            if (wrapperId) {
+                var s = document.querySelector('#' + wrapperId + ' .img-load-spinner');
+                if (s) s.style.display = 'block';
+            }
+            loadImg(id, src, wrapperId);
+        }
+
+        function initApp() {
+            const root = document.documentElement;
+            root.style.setProperty('--img-checkbox-square', `url('${CONFIG.images.checkboxSquare}')`);
+            root.style.setProperty('--img-checkbox-check', `url('${CONFIG.images.checkboxCheck}')`);
+
+            document.querySelector('.cover-container').classList.add('intro-mode');
+
+            document.getElementById('t-intro').innerText = CONFIG.text.intro.title;
+            document.getElementById('d-intro').innerText = CONFIG.text.intro.desc;
+            loadImg('imgIntro', CONFIG.images.intro, 'wrapIntro');
+            document.getElementById('btnIntroPri').innerText = CONFIG.text.intro.btnPri;
+
+            loadImg('imgClose', CONFIG.images.close, null);
+            loadImg('imgClear', CONFIG.images.clear, null);
+            loadImg('imgEdit', CONFIG.images.edit, null);
+
+            document.querySelectorAll('.img-edit-review').forEach(function (img) {
+                img.style.opacity = '0';
+                img.onload = function () { this.style.opacity = '1'; };
+                img.onerror = function () { this.style.opacity = '1'; };
+                img.src = CONFIG.images.edit;
+            });
+            document.getElementById('mod-title').innerText = CONFIG.text.exitModal.title;
+            document.getElementById('mod-msg').innerText = CONFIG.text.exitModal.msg;
+            document.getElementById('btn-stay').innerText = CONFIG.text.exitModal.btnStay;
+            document.getElementById('btn-exit').innerText = CONFIG.text.exitModal.btnExit;
+            document.getElementById('t-step0').innerText = CONFIG.text.step0.title;
+            document.getElementById('inputCepOrigin').placeholder = CONFIG.text.step0.placeholder;
+            document.getElementById('l-dontknow').innerText = CONFIG.text.step0.link;
+            document.getElementById('btnCepContinuar').innerText = CONFIG.text.step0.btn;
+            document.getElementById('t-stepSearch').innerText = CONFIG.text.search.title;
+            document.getElementById('lbl-uf').innerText = CONFIG.text.search.labels.uf;
+            document.getElementById('inputUFDisplay').placeholder = CONFIG.text.search.placeholders.uf;
+            document.getElementById('lbl-city').innerText = CONFIG.text.search.labels.city;
+            document.getElementById('searchCidade').placeholder = CONFIG.text.search.placeholders.city;
+            document.getElementById('lbl-street-search').innerText = CONFIG.text.search.labels.street;
+            document.getElementById('searchRua').placeholder = CONFIG.text.search.placeholders.street;
+            document.getElementById('btnExecSearch').innerText = CONFIG.text.search.btn;
+            document.getElementById('btnBackSearch').innerText = CONFIG.text.search.back;
+            document.getElementById('t-step1').innerText = CONFIG.text.step1.title;
+            document.getElementById('lbl-cep').innerText = CONFIG.text.step1.labels.cep;
+            document.getElementById('lbl-street').innerText = CONFIG.text.step1.labels.street;
+            document.getElementById('inputRua').placeholder = CONFIG.text.step1.placeholders.street;
+            document.getElementById('lbl-neigh').innerText = CONFIG.text.step1.labels.neigh;
+            document.getElementById('inputBairro').placeholder = CONFIG.text.step1.placeholders.neigh;
+            document.getElementById('lbl-city-disp').innerText = CONFIG.text.step1.labels.city;
+            document.getElementById('lbl-uf-disp').innerText = CONFIG.text.step1.labels.uf;
+            document.getElementById('btnStep1').innerText = CONFIG.text.step1.btn;
+            document.getElementById('t-step2').innerText = CONFIG.text.step2.title;
+            document.getElementById('inputNum').placeholder = CONFIG.text.step2.placeholder;
+            document.getElementById('chk-nonum').innerText = CONFIG.text.step2.check;
+            document.getElementById('btnStep2').innerText = CONFIG.text.step2.btn;
+            document.getElementById('btnBack2').innerText = CONFIG.text.step2.back;
+            document.getElementById('t-step3').innerText = CONFIG.text.step3.title;
+            document.getElementById('inputComp').placeholder = CONFIG.text.step3.placeholder;
+            document.getElementById('chk-nocomp').innerText = CONFIG.text.step3.check;
+            document.getElementById('btnStep3').innerText = CONFIG.text.step3.btn;
+            document.getElementById('btnBack3').innerText = CONFIG.text.step3.back;
+            document.getElementById('t-step4').innerText = CONFIG.text.step4.title;
+            document.getElementById('inputRef').placeholder = CONFIG.text.step4.placeholder;
+            document.getElementById('legend-ref').innerText = CONFIG.text.step4.legend;
+            document.getElementById('btnStep4').innerText = CONFIG.text.step4.btn;
+            document.getElementById('btnBack4').innerText = CONFIG.text.step4.back;
+            document.getElementById('t-step5').innerText = CONFIG.text.step5.title;
+            document.getElementById('btnReview').innerText = CONFIG.text.step5.btn;
+            document.getElementById('btnBack5').innerText = CONFIG.text.step5.back;
+            document.getElementById('t-step6').innerText = CONFIG.text.step6.title;
+            document.getElementById('btnConfirm').innerText = CONFIG.text.step6.btn;
+            document.getElementById('t-step7').innerText = CONFIG.text.step7.title;
+            document.getElementById('msg-success').innerText = CONFIG.text.step7.msg;
+            document.getElementById('ctaFinal').innerText = CONFIG.text.step7.btn;
+
+            document.getElementById('ctaFinal').onclick = handleFinalCta;
+        }
+
+        function goToStep(idx) {
+            const closeBtn = document.querySelector('.close-btn');
+
+            if (closeBtn) {
+                if (idx === 7) {
+                    closeBtn.style.visibility = 'hidden';
+                } else {
+                    closeBtn.style.visibility = 'visible';
+                }
+            }
+
+            const progBox = document.getElementById('progBarBox');
+            const progFill = document.getElementById('progBarFill');
+
+            const progressMap = {
+                0: '15%',
+                'Search': '15%',
+                1: '30%',
+                2: '45%',
+                3: '60%',
+                4: '75%',
+                5: '90%',
+                6: '100%'
+            };
+
+            if (progressMap[idx] !== undefined) {
+                progBox.style.display = 'block';
+                setTimeout(() => { progFill.style.width = progressMap[idx]; }, 10);
+            } else {
+                progBox.style.display = 'none';
+                progFill.style.width = '0%';
+            }
+
+            const forceFocus = (elementId) => {
+                const el = document.getElementById(elementId);
+                if (!el) return;
+                el.focus();
+                setTimeout(() => {
+                    el.focus();
+                    el.click();
+                }, 50);
+            };
+
+            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+
+            let targetId = '';
+            if (idx === 'Search') targetId = 'stepSearch';
+            else if (idx === 'Intro') targetId = 'stepIntro';
+            else targetId = 'step' + idx;
+
+            const targetSlide = document.getElementById(targetId);
+
+            if (targetSlide) {
+                targetSlide.classList.add('active');
+                void targetSlide.offsetWidth;
+                const content = targetSlide.querySelector('.form-content');
+                if (content) content.scrollTop = 0;
+            }
+
+            if (idx === 0) {
+                const inputOrigem = document.getElementById('inputCepOrigin');
+                const btn = document.getElementById('btnCepContinuar');
+                let valorBruto = (storedCepRaw || inputOrigem.value || "").toString();
+                let valorApenasNumeros = valorBruto.replace(/[^0-9]/g, '');
+
+                inputOrigem.value = valorApenasNumeros;
+                storedCepRaw = valorApenasNumeros;
+                btn.innerHTML = CONFIG.text.step0.btn;
+                btn.disabled = (valorApenasNumeros.length !== 8);
+                isAutoClick = false;
+
+                forceFocus('inputCepOrigin');
+                return;
+            }
+
+            if (idx === 'Search') {
+                resetSearchScreen();
+                forceFocus('inputUFDisplay');
+                return;
+            }
+
+            if (idx === 1) {
+                if (isAddressComplete) {
+                    goToStep(0);
+                    return;
+                }
+                validateStep1();
+
+                const ruaInput = document.getElementById('inputRua');
+                const bairroInput = document.getElementById('inputBairro');
+
+                if (!ruaInput.hasAttribute('readonly') && ruaInput.value.trim() === "") {
+                    forceFocus('inputRua');
+                } else if (!bairroInput.hasAttribute('readonly') && bairroInput.value.trim() === "") {
+                    forceFocus('inputBairro');
+                }
+            }
+
+            if (idx === 2) {
+                validateStep2();
+                const inputNum = document.getElementById('inputNum');
+                const chkNoNum = document.getElementById('noNum');
+
+                const contextEl = document.getElementById('step2-address-context');
+                if (contextEl) {
+                    if (!isOfflineMode && isAddressComplete) {
+                        const rua = document.getElementById('inputRua').value;
+                        const bairro = document.getElementById('inputBairro').value;
+                        contextEl.innerText = `${rua}, ${bairro}`;
+                        contextEl.style.display = 'block';
+                    } else {
+                        contextEl.style.display = 'none';
+                    }
+                }
+            }
+
+            if (idx === 3) { validateStep3(); }
+
+            if (idx === 4) {
+                prepareStep4Visuals();
+                const inputRef = document.getElementById('inputRef');
+                if (inputRef.value.trim() === "") {
+                    forceFocus('inputRef');
+                }
+            }
+        }
+
+        function validateStep0() {
+            const cep = document.getElementById('inputCepOrigin').value;
+            document.getElementById('btnCepContinuar').disabled = (cep.length !== 8);
+        }
+
+        function handleCepInput(el) {
+            el.value = el.value.replace(/\D/g, '');
+            storedCepRaw = el.value;
+            apiFailureCount = 0; // Reseta na tentativa manual do CEP
+
+            const errorMsg = document.getElementById('cepFeedback');
+            const btn = document.getElementById('btnCepContinuar');
+
+            btn.onclick = fetchCep;
+
+            el.classList.remove('input-error');
+            if (errorMsg) {
+                errorMsg.style.display = 'none';
+                errorMsg.innerText = "";
+            }
+
+            validateStep0();
+
+            if (el.value.length === 8) {
+                fetchCep();
+            } else {
+                btn.innerHTML = CONFIG.text.step0.btn;
+                btn.disabled = true;
+            }
+        }
+
+        async function fetchCep() {
+            const cepInput = document.getElementById('inputCepOrigin');
+            const originalCep = cepInput.value;
+            const linkDontKnow = document.getElementById('l-dontknow');
+            const feedbackMsg = document.getElementById('cepFeedback');
+
+            if (originalCep.length !== 8) return;
+
+            const btn = document.getElementById('btnCepContinuar');
+
+            if (feedbackMsg) feedbackMsg.style.display = 'none';
+            cepInput.classList.remove('input-error');
+
+            btn.disabled = true;
+            btn.innerHTML = 'Buscando <div class="btn-spinner"></div>';
+
+            if (linkDontKnow) linkDontKnow.classList.add('disabled');
+
+            try {
+                const r = await fetch(`https://viacep.com.br/ws/${originalCep}/json/`);
+                const d = await r.json();
+
+                const currentVal = document.getElementById('inputCepOrigin').value;
+
+                if (currentVal !== originalCep) {
+                    if (linkDontKnow) linkDontKnow.classList.remove('disabled'); // Trava removida
+                    return;
+                }
+
+                if (!d.erro) {
+                    if (linkDontKnow) linkDontKnow.classList.remove('disabled'); // Trava removida
+                    fillFormAndContinue(d);
+                } else {
+                    cepInput.classList.add('input-error');
+                    if (feedbackMsg) {
+                        feedbackMsg.innerText = "CEP não encontrado.";
+                        feedbackMsg.style.display = 'block';
+                    }
+                    btn.innerText = CONFIG.text.step0.btn;
+                    btn.disabled = true;
+                    if (linkDontKnow) linkDontKnow.classList.remove('disabled'); // Trava removida
+                }
+            } catch (e) {
+                console.error("ViaCEP fora do ar ou sem internet:", e);
+                const currentVal = document.getElementById('inputCepOrigin').value;
+
+                if (currentVal === originalCep) {
+
+                    if (apiFailureCount === 1) {
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                    }
+
+                    if (document.getElementById('inputCepOrigin').value !== originalCep) {
+                        if (linkDontKnow) linkDontKnow.classList.remove('disabled');
+                        return;
+                    }
+
+                    apiFailureCount++;
+
+                    cepInput.classList.add('input-error');
+
+                    if (feedbackMsg) {
+                        if (apiFailureCount >= 2) {
+                            feedbackMsg.innerText = "Erro de conexão.";
+                        } else {
+                            feedbackMsg.innerText = "Erro na conexão. Verifique sua internet.";
+                        }
+                        feedbackMsg.style.display = 'block';
+                    }
+
+                    if (apiFailureCount >= 2) {
+                        viacepApiStatus = "off";
+                        btn.innerText = "Inserir manualmente";
+                        btn.disabled = false;
+                        btn.onclick = enableManualAddressEntry;
+                    } else {
+                        btn.innerText = "Tentar novamente";
+                        btn.disabled = false;
+                        btn.onclick = fetchCep;
+                    }
+
+                    if (linkDontKnow) linkDontKnow.classList.remove('disabled'); // Trava removida
+                } else {
+                    if (linkDontKnow) linkDontKnow.classList.remove('disabled'); // Trava removida
+                }
+            }
+        }
+
+        function fillFormAndContinue(data) {
+            storedCepFormatted = data.cep;
+            storedCepRaw = data.cep.replace(/\D/g, '');
+            document.getElementById('inputCepOrigin').value = storedCepRaw;
+            document.getElementById('inputCepDisplay').value = data.cep;
+
+            const ruaInput = document.getElementById('inputRua');
+            const bairroInput = document.getElementById('inputBairro');
+            const cidadeInput = document.getElementById('inputCidade');
+            const estadoInput = document.getElementById('inputEstado');
+            const titleEl = document.getElementById('t-step1');
+            const btnEl = document.getElementById('btnStep1');
+
+            let logradouro = data.logradouro || "";
+            let bairro = data.bairro || "";
+
+            isCepUnico = (logradouro === "" || logradouro === "Sem nome");
+            const isRuaInvalida = (logradouro === "" || logradouro === "Sem nome");
+            const isBairroInvalido = (bairro === "" || bairro === "Sem bairro");
+
+            if (isRuaInvalida || isBairroInvalido) {
+                isAddressComplete = false;
+            } else {
+                isAddressComplete = true;
+            }
+
+            if (!isAddressComplete) {
+                titleEl.innerText = "Complete seu endereço";
+                btnEl.innerText = "Continuar";
+            } else {
+                titleEl.innerText = CONFIG.text.step1.title;
+                btnEl.innerText = CONFIG.text.step1.btn;
+            }
+
+            if (isRuaInvalida) {
+                ruaInput.value = "";
+                ruaInput.removeAttribute('readonly');
+                ruaInput.classList.remove('system-disabled');
+                ruaInput.classList.remove('input-error');
+            } else {
+                ruaInput.value = logradouro;
+                ruaInput.setAttribute('readonly', true);
+                ruaInput.classList.add('system-disabled');
+                ruaInput.classList.remove('input-error');
+            }
+
+            if (isBairroInvalido) {
+                bairroInput.value = "";
+                bairroInput.removeAttribute('readonly');
+                bairroInput.classList.remove('system-disabled');
+                bairroInput.classList.remove('input-error');
+            } else {
+                bairroInput.value = bairro;
+                bairroInput.setAttribute('readonly', true);
+                bairroInput.classList.add('system-disabled');
+                bairroInput.classList.remove('input-error');
+            }
+
+            cidadeInput.value = data.localidade || "";
+            cidadeInput.setAttribute('readonly', true);
+            cidadeInput.classList.add('system-disabled');
+
+            estadoInput.value = data.uf || "";
+            estadoInput.setAttribute('readonly', true);
+            estadoInput.classList.add('system-disabled');
+
+            if (!isAddressComplete) {
+                goToStep(1);
+                validateStep1();
+            } else {
+                goToStep(2);
+            }
+        }
+
+        function enableManualAddressEntry() {
+            isOfflineMode = true;
+            isAddressComplete = false;
+
+            if (storedCepRaw && storedCepRaw.length === 8) {
+                storedCepFormatted = storedCepRaw.replace(/^(\d{5})(\d{3})$/, "$1-$2");
+            }
+            document.getElementById('inputCepDisplay').value = storedCepFormatted || "Não informado";
+
+            const fields = ['inputRua', 'inputBairro', 'inputCidade', 'inputEstado'];
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                el.value = el.value || "";
+                el.removeAttribute('readonly');
+                el.classList.remove('system-disabled');
+                el.classList.remove('input-error');
+            });
+
+            document.getElementById('inputCidade').placeholder = "Nome da cidade";
+            document.getElementById('inputEstado').placeholder = "UF (Ex: SP)";
+            document.getElementById('t-step1').innerText = "Complete seu endereço";
+            document.getElementById('btnStep1').innerText = "Continuar";
+
+            goToStep(1);
+            validateStep1();
+        }
+
+        function handleSearchError(type, params) {
+            searchFailureCount++;
+            const suggestions = document.getElementById(type === 'city' ? 'citySuggestions' : 'streetSuggestions');
+            const btn = document.getElementById('btnExecSearch');
+
+            let retryLink = type === 'city' ? `retrySearch('city', '${params}')` : `retrySearch('street', '${params.uf}', '${params.city}', '${params.fragment}')`;
+            const linkStyle = "color: var(--App-Interaction-Link); font-weight: bold; cursor: pointer;";
+
+            if (searchFailureCount >= 2) {
+                if (type === 'city') ibgeApiStatus = "off";
+                if (type === 'street') viacepApiStatus = "off";
+                suggestions.innerHTML = `<div class="suggestion-item" style="cursor: default;"><i>Erro de conexão.</i></div>`;
+                btn.innerText = "Inserir manualmente";
+                btn.disabled = false;
+                btn.onclick = enableManualAddressEntry;
+            } else {
+                suggestions.innerHTML = `<div class="suggestion-item">Erro de conexão. <a href="#" onclick="${retryLink}; return false;" style="${linkStyle}">Tentar novamente</a></div>`;
+            }
+            suggestions.style.display = 'block';
+        }
+
+        window.retrySearch = function (type, p1, p2, p3) {
+            document.getElementById(type === 'city' ? 'citySuggestions' : 'streetSuggestions').innerHTML = '<div class="suggestion-item">Buscando...</div>';
+            if (type === 'city') fetchCities(p1);
+            else execStreetSearch(p1, p2, p3);
+        }
+
+        function validateStep1() {
+            const ruaInput = document.getElementById('inputRua');
+            const bairroInput = document.getElementById('inputBairro');
+            const cidadeInput = document.getElementById('inputCidade');
+            const estadoInput = document.getElementById('inputEstado');
+            const btn = document.getElementById('btnStep1');
+
+            const ruaVal = ruaInput.value.trim();
+            const bairroVal = bairroInput.value.trim();
+            const cidadeVal = cidadeInput.value.trim();
+            const estadoVal = estadoInput.value.trim();
+
+            if (!ruaInput.hasAttribute('readonly')) ruaInput.classList.remove('input-error');
+            if (!bairroInput.hasAttribute('readonly')) bairroInput.classList.remove('input-error');
+
+            const isValid = (ruaVal !== "" && bairroVal !== "" && cidadeVal !== "" && estadoVal !== "");
+            btn.disabled = !isValid;
+        }
+
+        function validateStep2() { document.getElementById('btnStep2').disabled = !(document.getElementById('inputNum').value.trim() !== "" || document.getElementById('noNum').checked); }
+        function validateStep3() { document.getElementById('btnStep3').disabled = !(document.getElementById('inputComp').value.trim() !== "" || document.getElementById('noComp').checked); }
+        function validateStep4() {
+            const input = document.getElementById('inputRef');
+            const btn = document.getElementById('btnStep4');
+            const feedback = document.getElementById('refFeedback');
+            const currentLength = input.value.trim().length;
+            const minChars = 5;
+
+            if (currentLength < minChars) {
+                const missing = minChars - currentLength;
+                const plural = missing > 1 ? 's' : 'e';
+                input.classList.add('input-error');
+                feedback.style.display = 'block';
+                feedback.innerText = `Digite pelo menos mais ${missing} caracter${plural}`;
+                btn.disabled = true;
+            } else {
+                input.classList.remove('input-error');
+                feedback.style.display = 'none';
+                btn.disabled = false;
+            }
+        }
+        function prepareStep4Visuals() {
+            const input = document.getElementById('inputRef');
+            const feedback = document.getElementById('refFeedback');
+            const btn = document.getElementById('btnStep4');
+            input.classList.remove('input-error');
+            feedback.style.display = 'none';
+            if (input.value.trim().length >= 5) { btn.disabled = false; } else { btn.disabled = true; }
+        }
+        function toggleNum(cb) { const i = document.getElementById('inputNum'); i.disabled = cb.checked; i.value = cb.checked ? CONFIG.text.step2.noNumValue : ""; validateStep2(); }
+        function toggleComp(cb) { const i = document.getElementById('inputComp'); i.disabled = cb.checked; i.value = cb.checked ? CONFIG.text.step3.noCompValue : ""; validateStep3(); }
+        function selectTransport(el) { document.querySelectorAll('.radio-option').forEach(r => r.classList.remove('selected')); el.classList.add('selected'); el.querySelector('input').checked = true; document.getElementById('btnReview').disabled = false; }
+
+        function renderReview() {
+            const t = document.querySelector('input[name="transporte"]:checked')?.value || "-";
+
+            document.getElementById('rev_cep').value = storedCepFormatted || "Não informado";
+            document.getElementById('rev_rua').value = document.getElementById('inputRua').value;
+            document.getElementById('rev_num').value = document.getElementById('noNum').checked ? "S/N" : document.getElementById('inputNum').value;
+            document.getElementById('rev_comp').value = document.getElementById('noComp').checked ? "Sem complemento" : document.getElementById('inputComp').value;
+            document.getElementById('rev_bairro').value = document.getElementById('inputBairro').value;
+            document.getElementById('rev_cidade').value = document.getElementById('inputCidade').value;
+            document.getElementById('rev_uf').value = document.getElementById('inputEstado').value;
+            document.getElementById('rev_ref').value = document.getElementById('inputRef').value;
+            document.getElementById('rev_transporte').value = t;
+
+            const ruaInput = document.getElementById('rev_rua'); const ruaBtn = document.getElementById('rev_rua_btn');
+            const bairroInput = document.getElementById('rev_bairro'); const bairroBtn = document.getElementById('rev_bairro_btn');
+            const cidInput = document.getElementById('rev_cidade'); const cidBtn = document.getElementById('rev_cidade_btn');
+            const ufInput = document.getElementById('rev_uf'); const ufBtn = document.getElementById('rev_uf_btn');
+
+            if (isOfflineMode) {
+                [ruaInput, bairroInput, cidInput, ufInput].forEach(el => {
+                    if (el) { el.classList.remove('system-disabled'); el.onclick = () => goToStep(1); }
+                });
+                [ruaBtn, bairroBtn, cidBtn, ufBtn].forEach(btn => {
+                    if (btn) { btn.style.display = 'flex'; btn.onclick = () => goToStep(1); }
+                });
+            } else {
+                if (isAddressComplete) {
+                    if (ruaInput) { ruaInput.classList.add('system-disabled'); ruaInput.onclick = null; }
+                    if (ruaBtn) { ruaBtn.style.display = 'none'; }
+                    if (bairroInput) { bairroInput.classList.add('system-disabled'); bairroInput.onclick = null; }
+                    if (bairroBtn) { bairroBtn.style.display = 'none'; }
+                } else {
+                    if (ruaInput) { ruaInput.classList.remove('system-disabled'); ruaInput.onclick = () => goToStep(1); }
+                    if (ruaBtn) { ruaBtn.style.display = 'flex'; }
+                    if (bairroInput) { bairroInput.classList.remove('system-disabled'); bairroInput.onclick = () => goToStep(1); }
+                    if (bairroBtn) { bairroBtn.style.display = 'flex'; }
+                }
+
+                if (cidInput) { cidInput.classList.add('system-disabled'); cidInput.onclick = null; }
+                if (cidBtn) { cidBtn.style.display = 'none'; }
+                if (ufInput) { ufInput.classList.add('system-disabled'); ufInput.onclick = null; }
+                if (ufBtn) { ufBtn.style.display = 'none'; }
+            }
+
+            goToStep(6);
+        }
+
+        async function confirmAddress() {
+            const btn = document.getElementById('btnConfirm');
+
+            const payload = {
+                created_at:              new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString().replace('Z', '-03:00'),
+                customer_id:             String(CT_INJECTED_IDENTITY || ''),
+                "Rastreio Flash":        String(CT_INJECTED_CODIGO_RASTREIO_FLASH || ''),
+                "CEP":                   storedCepRaw,
+                "Rua":                   document.getElementById('inputRua').value,
+                "Número":                document.getElementById('noNum').checked ? "S/N" : document.getElementById('inputNum').value,
+                "Complemento":           document.getElementById('noComp').checked ? "Sem complemento" : document.getElementById('inputComp').value,
+                "Referência":            document.getElementById('inputRef').value,
+                "Rastreio Correios":     String(CT_INJECTED_CODIGO_RASTREIO_CORREIOS || ''),
+                "Motivo De Devolucao":   String(CT_INJECTED_MOTIVO_DE_DEVOLUCAO || ''),
+                "Bairro":                document.getElementById('inputBairro').value,
+                "Cidade":                document.getElementById('inputCidade').value,
+                "UF":                    document.getElementById('inputEstado').value,
+                "Transporte":            document.querySelector('input[name="transporte"]:checked')?.value || "-",
+                viacep:                  isOfflineMode ? "off" : "on"
+            };
+
+            btn.disabled = true;
+            btn.innerHTML = 'Salvando... <div class="btn-spinner"></div>';
+
+            try {
+                // 1. Auth anônima Firebase
+                const authRes = await fetch(
+                    `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${FIREBASE_API_KEY}`,
+                    {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ returnSecureToken: true })
+                    }
+                );
+                if (!authRes.ok) throw new Error("Firebase auth failed: " + authRes.status);
+                const authData = await authRes.json();
+                const idToken = authData.idToken;
+
+                // 2. Converter payload para formato de campos do Firestore REST
+                function toFirestoreFields(obj) {
+                    var fields = {};
+                    Object.keys(obj).forEach(function(key) {
+                        var val = obj[key];
+                        if (typeof val === 'boolean')      fields[key] = { booleanValue: val };
+                        else if (typeof val === 'number')  fields[key] = { doubleValue: val };
+                        else                               fields[key] = { stringValue: String(val) };
+                    });
+                    return fields;
+                }
+
+                // 3. Salvar documento no Firestore via REST
+                const firestoreUrl = `https://firestore.googleapis.com/v1/projects/${FIREBASE_PROJECT_ID}/databases/(default)/documents/${CONFIG.api.collection}`;
+                const saveRes = await fetch(firestoreUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": "Bearer " + idToken
+                    },
+                    body: JSON.stringify({ fields: toFirestoreFields(payload) })
+                });
+                if (!saveRes.ok) throw new Error("Firestore save failed: " + saveRes.status);
+
+                wasSaveSuccessful = true;
+                finishSuccess(payload);
+
+            } catch (error) {
+                console.error('Erro ao salvar no Firestore:', error);
+                wasSaveSuccessful = false;
+                finishSuccess(payload);
+            }
+        }
+
+        function finishSuccess(payload) {
+            ctTrackEvent("Inapp_Forms-Aguard-Tlmkt", {
+                "salvou-dados-status": wasSaveSuccessful ? "sucesso" : "erro",
+                "viacep-status": viacepApiStatus,
+                "ibge-status": ibgeApiStatus,
+                "qtd-cliques-nao-sei-cep": qtdCliquesNaoSeiCep,
+                "cep-unico": isCepUnico
+            });
+
+            const btn = document.getElementById('btnConfirm');
+            btn.innerHTML = CONFIG.text.step6.btn;
+            btn.disabled = false;
+
+            const titleEl = document.getElementById('t-step7');
+            const msgEl = document.getElementById('msg-success');
+            const imgEl = document.getElementById('imgSuccess');
+            const ctaEl = document.getElementById('ctaFinal');
+
+            if (wasSaveSuccessful) {
+                titleEl.innerText = CONFIG.text.step7.title;
+                msgEl.innerText = CONFIG.text.step7.msg;
+                msgEl.style.color = "var(--App-Interaction-Primary-Text)";
+                resetAndLoadImg('imgSuccess', CONFIG.images.success, 'wrapSuccess');
+                ctaEl.innerText = CONFIG.text.step7.btn;
+            } else {
+                titleEl.innerText = CONFIG.text.step7.titleError;
+                msgEl.innerText = CONFIG.text.step7.msgError;
+                msgEl.style.color = "var(--Brand-Status-Red-Red)";
+                resetAndLoadImg('imgSuccess', CONFIG.images.error || CONFIG.images.close, 'wrapSuccess');
+                ctaEl.innerText = CONFIG.text.step7.btnError;
+            }
+
+            goToStep(7);
+        }
+
+        function normalizeStr(str) { return str ? str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase() : ""; }
+
+        function scrollToInput(elementId) {
+            setTimeout(() => {
+                const el = document.getElementById(elementId);
+                if (!el) return;
+                const parent = el.closest('.form-group');
+                const dropdown = parent ? parent.querySelector('.autocomplete-suggestions') : null;
+                const isDropdownOpen = dropdown && dropdown.style.display === 'block';
+                if (isDropdownOpen) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+                else { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+            }, 400);
+        }
+
+        function openStateDropdown() {
+            const list = document.getElementById('stateList');
+            const inputVal = normalizeStr(document.getElementById('inputUFDisplay').value);
+            list.innerHTML = '';
+
+            const filteredStates = statesData.filter(st => normalizeStr(st.s).startsWith(inputVal));
+
+            if (filteredStates.length === 0) {
+                list.innerHTML = '<div class="suggestion-item" style="cursor: default;"><i>Estado não encontrado.</i></div>';
+                list.style.display = 'block';
+                return;
+            }
+
+            filteredStates.forEach(st => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                div.innerHTML = `<b>${st.s}</b>`;
+                div.onclick = (e) => { e.stopPropagation(); selectState(st.s); };
+                list.appendChild(div);
+            });
+
+            list.style.display = 'block';
+            scrollToInput('inputUFDisplay');
+        }
+
+        function handleStateInput(el) {
+            el.value = el.value.toUpperCase().replace(/[^A-Z]/g, '');
+            const val = el.value;
+            if (val === '') {
+                resetFieldsBelowState();
+                openStateDropdown();
+                return;
+            }
+            if (val.length === 2) {
+                const estadoValido = statesData.find(st => st.s === val);
+                if (estadoValido) { selectState(val); return; }
+            }
+            openStateDropdown();
+        }
+
+        function openStateDropdownStep1() {
+            const input = document.getElementById('inputEstado');
+            if (input.hasAttribute('readonly')) return;
+
+            const list = document.getElementById('stateListStep1');
+            const inputVal = normalizeStr(input.value);
+            list.innerHTML = '';
+
+            const filteredStates = statesData.filter(st => normalizeStr(st.s).startsWith(inputVal));
+
+            if (filteredStates.length === 0) {
+                list.innerHTML = '<div class="suggestion-item" style="cursor: default;"><i>Estado não encontrado.</i></div>';
+                list.style.display = 'block';
+                return;
+            }
+
+            filteredStates.forEach(st => {
+                const div = document.createElement('div');
+                div.className = 'suggestion-item';
+                div.innerHTML = `<b>${st.s}</b>`;
+                div.onclick = (e) => { e.stopPropagation(); selectStateStep1(st.s); };
+                list.appendChild(div);
+            });
+
+            list.style.display = 'block';
+            scrollToInput('inputEstado');
+        }
+
+        function handleStateInputStep1(el) {
+            el.value = el.value.toUpperCase().replace(/[^A-Z]/g, '');
+            validateStep1(); // Atualiza a validação do botão
+
+            const val = el.value;
+            if (val === '') {
+                openStateDropdownStep1();
+                return;
+            }
+            if (val.length === 2) {
+                const estadoValido = statesData.find(st => st.s === val);
+                if (estadoValido) { selectStateStep1(val); return; }
+            }
+            openStateDropdownStep1();
+        }
+
+        function selectStateStep1(uf) {
+            document.getElementById('inputEstado').value = uf;
+            document.getElementById('stateListStep1').style.display = 'none';
+            validateStep1();
+            document.getElementById('inputEstado').blur(); // Fecha o teclado
+        }
+
+        function selectState(uf) {
+            document.getElementById('inputUFDisplay').value = uf;
+            document.getElementById('stateList').style.display = 'none';
+            document.getElementById('searchCidade').value = '';
+            document.getElementById('searchRua').value = '';
+            const cityInput = document.getElementById('searchCidade');
+            const ruaInput = document.getElementById('searchRua');
+            cityInput.disabled = false;
+            ruaInput.disabled = true;
+            cityInput.focus();
+            scrollToInput('searchCidade');
+            fetchCities(uf);
+        }
+
+        function resetFieldsBelowState() {
+            const c = document.getElementById('searchCidade');
+            const r = document.getElementById('searchRua');
+            c.value = ''; r.value = '';
+            c.disabled = true; r.disabled = true;
+        }
+
+        async function fetchCities(uf) {
+            try {
+                const r = await fetch(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${uf}/municipios`);
+                const data = await r.json();
+                citiesList = data.map(c => c.nome);
+                searchFailureCount = 0; // Zera se der sucesso
+            } catch (e) {
+                handleSearchError('city', uf);
+            }
+        }
+
+        function handleCityInput(el) {
+            const val = normalizeStr(el.value);
+            const suggestions = document.getElementById('citySuggestions');
+            suggestions.innerHTML = '';
+
+            if (val.length === 0) {
+                const rua = document.getElementById('searchRua');
+                rua.value = '';
+                rua.disabled = true;
+                document.getElementById('btnClearStreet').style.display = 'none';
+                suggestions.style.display = 'none';
+                return;
+            }
+
+            if (val.length < 2) { suggestions.style.display = 'none'; return; }
+
+            const filtered = citiesList.filter(c => normalizeStr(c).includes(val)).slice(0, 10);
+
+            if (filtered.length > 0) {
+                filtered.forEach(city => {
+                    const div = document.createElement('div');
+                    div.className = 'suggestion-item';
+                    div.innerText = city;
+                    div.onclick = (e) => {
+                        e.stopPropagation();
+                        el.value = city;
+                        suggestions.style.display = 'none';
+                        checkUniqueCep(document.getElementById('inputUFDisplay').value, city);
+                    };
+                    suggestions.appendChild(div);
+                });
+                suggestions.style.display = 'block';
+                scrollToInput('searchCidade');
+            } else {
+                suggestions.innerHTML = '<div class="suggestion-item" style="cursor: default;"><i>Cidade não encontrada.</i></div>';
+                suggestions.style.display = 'block';
+            }
+        }
+
+        async function checkUniqueCep(uf, city) {
+            const ruaInput = document.getElementById('searchRua');
+            const btnClear = document.getElementById('btnClearStreet');
+            const loader = document.getElementById('loaderStreet');
+
+            btnClear.style.display = 'none';
+            loader.style.display = 'block';
+            ruaInput.disabled = true;
+
+            try {
+                const url = `https://viacep.com.br/ws/${uf}/${encodeURIComponent(city)}/Rua/json/`;
+                const r = await fetch(url);
+                const data = await r.json();
+
+                loader.style.display = 'none';
+
+                if (Array.isArray(data) && data.length === 1) {
+                    selectAddressFromSearch(data[0]);
+                    ruaInput.disabled = false;
+                } else {
+                    ruaInput.value = '';
+                    ruaInput.disabled = false;
+                    ruaInput.focus();
+                    btnClear.style.display = 'none';
+                    scrollToInput('searchRua');
+                }
+            } catch (e) {
+                viacepApiStatus = "off";
+                loader.style.display = 'none';
+                ruaInput.value = '';
+                ruaInput.disabled = false;
+                ruaInput.focus();
+            }
+        }
+
+        function handleStreetFocus(el) { scrollToInput('searchRua'); }
+
+        function handleStreetInput(el) {
+            const val = el.value;
+            const btnClear = document.getElementById('btnClearStreet');
+            const loader = document.getElementById('loaderStreet');
+            const suggestions = document.getElementById('streetSuggestions');
+            const uf = document.getElementById('inputUFDisplay').value;
+            const city = document.getElementById('searchCidade').value;
+
+            if (searchTimeout) clearTimeout(searchTimeout);
+
+            if (val.length >= 3 && uf && city) {
+                loader.style.display = 'block';
+                btnClear.style.display = 'none';
+                suggestions.style.display = 'none';
+                scrollToInput('searchRua');
+                searchTimeout = setTimeout(() => execStreetSearch(uf, city, val), 800);
+            } else {
+                loader.style.display = 'none';
+                btnClear.style.display = val.length > 0 ? 'flex' : 'none';
+                if (val.length === 0) { suggestions.style.display = 'none'; }
+            }
+        }
+
+        function clearStreetField() {
+            const input = document.getElementById('searchRua');
+            input.value = '';
+            document.getElementById('streetSuggestions').style.display = 'none';
+            document.getElementById('btnClearStreet').style.display = 'none';
+            document.getElementById('btnExecSearch').disabled = true;
+            input.focus();
+        }
+
+        async function execStreetSearch(uf, city, streetFragment) {
+            const currentVal = document.getElementById('searchRua').value;
+            if (currentVal !== streetFragment) return;
+
+            const suggestions = document.getElementById('streetSuggestions');
+            const loader = document.getElementById('loaderStreet');
+            const btnClear = document.getElementById('btnClearStreet');
+
+            try {
+                const url = `https://viacep.com.br/ws/${uf}/${encodeURIComponent(city)}/${encodeURIComponent(streetFragment)}/json/`;
+                const r = await fetch(url);
+                const data = await r.json();
+
+                if (document.getElementById('searchRua').value !== streetFragment) return;
+
+                searchFailureCount = 0; // Zera se der sucesso
+
+                suggestions.innerHTML = '';
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    suggestions.innerHTML = '<div class="suggestion-item"><i>Nenhum endereço encontrado.</i></div>';
+                    suggestions.style.display = 'block';
+                } else {
+                    data.forEach(addr => {
+                        const div = document.createElement('div');
+                        div.className = 'suggestion-item';
+                        const ruaTexto = (addr.logradouro && addr.logradouro.trim() !== "") ? addr.logradouro : "Sem nome";
+                        const bairroTexto = (addr.bairro && addr.bairro.trim() !== "") ? addr.bairro : "Sem bairro";
+                        div.innerHTML = `
+<span class="search-cep-item">${addr.cep}</span>
+<span style="font-size:14px; color:#333;">${ruaTexto}, ${bairroTexto}</span>
+`;
+                        div.onclick = (e) => {
+                            e.stopPropagation();
+                            selectAddressFromSearch(addr);
+                        };
+                        suggestions.appendChild(div);
+                    });
+                    suggestions.style.display = 'block';
+                    scrollToInput('searchRua');
+                }
+
+            } catch (e) {
+                if (document.getElementById('searchRua').value !== streetFragment) return;
+                handleSearchError('street', { uf: uf, city: city, fragment: streetFragment });
+            } finally {
+                if (document.getElementById('searchRua').value === streetFragment) {
+                    loader.style.display = 'none';
+                    if (document.getElementById('searchRua').value.length > 0) {
+                        btnClear.style.display = 'flex';
+                    }
+                }
+            }
+        }
+
+        function selectAddressFromSearch(addrData) {
+            storedCepRaw = addrData.cep.replace(/\D/g, '');
+            storedCepFormatted = addrData.cep;
+
+            const ruaTexto = (addrData.logradouro && addrData.logradouro.trim() !== "") ? addrData.logradouro : "Sem nome";
+            const bairroTexto = (addrData.bairro && addrData.bairro.trim() !== "") ? addrData.bairro : "Sem bairro";
+            document.getElementById('searchRua').value = `${addrData.cep}, ${ruaTexto}, ${bairroTexto}`;
+            document.getElementById('btnClearStreet').style.display = 'flex';
+            document.getElementById('streetSuggestions').style.display = 'none';
+            selectedSearchResult = {
+                ...addrData,
+                logradouro: ruaTexto,
+                bairro: bairroTexto
+            };
+            document.getElementById('btnExecSearch').disabled = false;
+            document.getElementById('searchRua').blur();
+        }
+
+        function proceedFromSearch() {
+            if (selectedSearchResult) {
+                fillFormAndContinue(selectedSearchResult);
+            }
+        }
+
+        function resetSearchScreen() {
+            const ufInput = document.getElementById('inputUFDisplay');
+            const cityInput = document.getElementById('searchCidade');
+            const ruaInput = document.getElementById('searchRua');
+            ufInput.value = '';
+            cityInput.value = '';
+            ruaInput.value = '';
+            ruaInput.placeholder = "Mínimo 3 letras";
+            document.getElementById('stateList').style.display = 'none';
+            document.getElementById('citySuggestions').style.display = 'none';
+            document.getElementById('streetSuggestions').style.display = 'none';
+            document.getElementById('btnClearStreet').style.display = 'none';
+
+            const btnExec = document.getElementById('btnExecSearch');
+            btnExec.disabled = true;
+            btnExec.innerText = CONFIG.text.search.btn; // Reseta texto do botão de erro
+            btnExec.onclick = proceedFromSearch; // Reseta ação
+            searchFailureCount = 0; // Zera contador
+
+            cityInput.disabled = true;
+            ruaInput.disabled = true;
+            ufInput.focus();
+            scrollToInput('inputUFDisplay');
+        }
+
+        document.body.addEventListener('touchmove', function (e) {
+            const isContent = e.target.closest('.form-content');
+            const isFooter = e.target.closest('.footer-actions');
+            const isModal = e.target.closest('.modal-box');
+            const isSuggestion = e.target.closest('.autocomplete-suggestions');
+
+            if (!isContent && !isFooter && !isModal && !isSuggestion) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        function handleUserCepClick(el) {
+            if (!isAutoClick) {
+                const btn = document.getElementById('btnCepContinuar');
+                const errorMsg = document.getElementById('cepFeedback');
+
+                apiFailureCount = 0;
+                btn.onclick = fetchCep;
+                btn.innerHTML = CONFIG.text.step0.btn;
+
+                el.classList.remove('input-error');
+                if (errorMsg) {
+                    errorMsg.style.display = 'none';
+                    errorMsg.innerText = "";
+                }
+
+                validateStep0();
+            }
+        }
+    </script>
+</body>
+
+</html>
