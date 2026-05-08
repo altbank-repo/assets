@@ -1,0 +1,1359 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>In-App Convite Consignado</title>
+
+    <style>
+            /* ==========================================================
+           VARIÁVEIS DE LAYOUT (específicas deste inapp)
+           ========================================================== */
+            :root {
+                --header-padding-top: 48px;    /* padding superior do header — ajuste conforme o notch */
+                --footer-padding-bottom: 34px; /* padding inferior do footer — ajuste conforme a home indicator */
+            }
+
+            /* ==========================================================
+           ESTRUTURA E LAYOUT (Atualizado com Tokens)
+           ========================================================== */
+            * {
+                box-sizing: border-box;
+                -webkit-tap-highlight-color: transparent;
+                outline: none;
+            }
+
+            html,
+            body {
+                margin: var(--Spacing-0);
+                padding: var(--Spacing-0);
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                background-color: var(--Brand-Neutral-White);
+                font-family: var(--font-secundaria);
+                -webkit-user-select: none;
+                user-select: none;
+                overscroll-behavior-y: none;
+            }
+
+            /* --- CONTAINER PRINCIPAL --- */
+            .cover-container {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                height: 100%;
+                padding-bottom: var(--footer-padding-bottom);
+            }
+
+            /* --- HEADER --- */
+            .header {
+                flex-shrink: 0;
+                display: flex;
+                justify-content: flex-start;
+                align-items: flex-end;
+                padding: var(--header-padding-top) var(--Spacing-24) var(--Spacing-8);
+                z-index: 10;
+            }
+
+            .close-btn {
+                display: block;
+                width: var(--Spacing-44);
+                height: var(--Spacing-44);
+                padding: 10px;
+                opacity: 0.6;
+                cursor: pointer;
+                transition: opacity 0.2s;
+            }
+
+            .close-btn:active {
+                opacity: 1;
+            }
+
+            .close-btn img {
+                width: var(--Spacing-24);
+                height: var(--Spacing-24);
+                display: block;
+            }
+
+            /* --- CAROUSEL WINDOW --- */
+            .slider-window {
+                flex: 1;
+                width: 100%;
+                overflow: hidden;
+                position: relative;
+                touch-action: pan-x;
+            }
+
+            .slider-track {
+                display: flex;
+                width: 300%;
+                height: 100%;
+                transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+                will-change: transform;
+            }
+
+            .slide {
+                width: calc(100% / 3);
+                height: 100%;
+                flex-shrink: 0;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                overflow-y: auto;
+                scrollbar-width: none;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .slide-content {
+                width: 100%;
+                max-width: 360px;
+                padding: 0 var(--Spacing-16);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                flex: 1;
+                box-sizing: border-box;
+            }
+
+            .slide::-webkit-scrollbar {
+                display: none;
+            }
+
+            .spacer-top {
+                margin-top: auto;
+            }
+
+            .spacer-bottom {
+                margin-bottom: auto;
+            }
+
+            /* --- TIPOGRAFIA & ESPAÇAMENTOS (Específicos do InApp) --- */
+            .tag-bonus {
+                background-color: var(--Brand-Action-Action);
+                color: var(--Branding-On-Brand-Color);
+                letter-spacing: 1px;
+                padding: var(--Spacing-4) var(--Spacing-16);
+                border-radius: var(--Radius-8);
+                margin-bottom: var(--Spacing-28);
+                flex-shrink: 0;
+            }
+
+            .title {
+                color: var(--App-Interaction-Primary-Text);
+                text-align: center;
+                margin: var(--Spacing-0) var(--Spacing-0) var(--Spacing-28) var(--Spacing-0);
+                width: 100%;
+                flex-shrink: 0;
+            }
+
+            .hero-image {
+                width: 100%;
+                max-width: 300px;
+                max-height: 130px;
+                height: auto;
+                image-rendering: -webkit-optimize-contrast;
+                filter: contrast(1.05);
+                object-fit: contain;
+                flex-shrink: 0;
+            }
+
+            .description {
+                color: var(--App-Interaction-Primary-Text);
+                text-align: center;
+                margin: var(--Spacing-0);
+                width: 100%;
+                flex-shrink: 0;
+            }
+
+            /* --- INFO BANNER --- */
+            .bullet-list {
+                width: 100%;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .bullet-item {
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 16px;
+            }
+
+            .bullet-item .bullet-badge {
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+                border-radius: var(--Radius-100);
+                background-color: var(--Brand-Accent-Accent);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                color: var(--Branding-On-Brand-Color);
+            }
+
+            .bullet-item span {
+                font-family: var(--font-secundaria);
+                font-size: 14px;
+                font-weight: 400;
+                line-height: 1.4;
+                color: var(--App-Interaction-Primary-Text);
+            }
+
+            .info-banner {
+                width: 100%;
+                background-color: var(--Brand-Neutral-Grey-Light);
+                padding: var(--Spacing-12) var(--Spacing-16);
+                border-radius: var(--Radius-12);
+                color: var(--App-Interaction-Primary-Text);
+                font-family: var(--font-secundaria);
+                font-size: 14px;
+                font-weight: 400;
+                line-height: 1.4;
+                flex-shrink: 0;
+                margin-top: var(--Spacing-28);
+                margin-bottom: var(--Spacing-0);
+                display: flex;
+                align-items: center;
+                gap: var(--Spacing-8);
+            }
+
+            .info-banner img {
+                width: 24px;
+                height: 24px;
+                flex-shrink: 0;
+            }
+
+            /* --- FOOTER / NAVEGAÇÃO --- */
+
+            .hero-badge {
+                width: 44px;
+                height: 44px;
+                border-radius: var(--Radius-100);
+                background-color: var(--Brand-Accent-Accent);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                color: var(--Branding-On-Brand-Color);
+                margin-bottom: var(--Spacing-28);
+                font-family: var(--font-secundaria);
+                font-size: 19px;
+                font-weight: 400;
+                line-height: 1;
+            }
+
+            /* --- CTA --- */
+            .cta-primary {
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                width: fit-content;
+                background-color: var(--App-Buttons-Primary-Action);
+                color: var(--App-Buttons-On-Primary-Action);
+                text-decoration: none;
+                font-family: var(--font-principal);
+                font-size: 14px;
+                font-weight: 700;
+                line-height: 1.4;
+                padding: 14px 32px;
+                border-radius: var(--Radius-100);
+                border: none;
+                cursor: pointer;
+                box-shadow: var(--Shadow-Soft);
+                flex-shrink: 0;
+                margin-bottom: var(--Spacing-24);
+            }
+
+            .cta-primary:active {
+                filter: brightness(0.7);
+                transform: scale(0.95);
+            }
+
+            .cta-primary:disabled,
+            .cta-primary[disabled] {
+                background-color: var(--Brand-Neutral-Grey-Light);
+                color: var(--Brand-Neutral-Grey-Darker);
+                cursor: not-allowed;
+                pointer-events: none;
+                box-shadow: none;
+                opacity: 1;
+            }
+
+            /* --- FOOTER / NAVEGAÇÃO --- */
+            .footer {
+                flex-shrink: 0;
+                padding: var(--Spacing-0) var(--Spacing-24);
+                height: var(--Spacing-80);
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                position: relative;
+                z-index: 999;
+            }
+
+            .nav-btn {
+                width: var(--Spacing-48);
+                height: var(--Spacing-48);
+                border-radius: 50%;
+                cursor: pointer;
+                border: none;
+                background: none;
+                padding: var(--Spacing-0);
+                transition: filter 0.2s, opacity 0.3s, transform 0.15s ease;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            .nav-btn img {
+                width: var(--Spacing-48);
+                height: var(--Spacing-48);
+                display: block;
+            }
+
+            .nav-btn:active {
+                filter: brightness(0.7);
+                transform: scale(0.88);
+            }
+
+            .nav-btn.hidden {
+                opacity: 0;
+                pointer-events: none;
+            }
+
+            .pagination {
+                display: flex;
+                gap: var(--Spacing-12);
+                align-items: center;
+            }
+
+            .dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background-color: var(--Brand-Neutral-Grey-Dark);
+                transition: transform 0.3s ease, background-color 0.3s ease;
+            }
+
+            .dot.active {
+                background-color: var(--Brand-Action-Action);
+                transform: scale(1.3);
+            }
+
+            strong,
+            b {
+                font-weight: 600;
+            }
+
+            .img-load-wrapper {
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: fit-content;
+                margin-bottom: var(--Spacing-28);
+            }
+
+            .img-load-spinner {
+                width: 18px;
+                height: 18px;
+                border: 2px solid var(--Brand-Neutral-Grey-Light);
+                border-top-color: var(--Brand-Neutral-Black-Lighter);
+                border-radius: 50%;
+                animation: spin 0.8s linear infinite;
+                position: absolute;
+                pointer-events: none;
+            }
+
+            .video-wrapper {
+                position: relative;
+                width: 100%;
+                aspect-ratio: 4 / 5;
+                border-radius: var(--Radius-12);
+                overflow: hidden;
+                background-color: var(--Brand-Neutral-Grey-Light);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                margin-bottom: var(--Spacing-28);
+                flex-shrink: 0;
+            }
+
+            .video-wrapper video {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: block;
+            }
+
+            .video-playpause-btn {
+                position: absolute;
+                inset: 0;
+                width: 100%;
+                height: 100%;
+                border: none;
+                background: none;
+                padding: 0;
+                cursor: pointer;
+                z-index: 9;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                -webkit-tap-highlight-color: transparent;
+            }
+
+            .video-playpause-btn .video-play-circle {
+                transform: translateY(-16px);
+            }
+
+            .video-play-circle {
+                width: 88px;
+                height: 88px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                opacity: 0;
+                transition: opacity 0.2s ease;
+                pointer-events: none;
+                background-color: rgba(228, 228, 228, 0.8);
+            }
+
+            .video-play-circle img {
+                width: 27px;
+                height: 34px;
+                display: block;
+                margin-left: 7px;
+            }
+
+            .video-play-circle.visible {
+                opacity: 1;
+            }
+
+            .video-controls-group {
+                position: absolute;
+                top: 16px;
+                right: 16px;
+                display: flex;
+                flex-direction: row;
+                align-items: center;
+                gap: 12px;
+                z-index: 10;
+            }
+
+            .video-controls-group .video-restart-btn {
+                position: static;
+                top: auto;
+                right: auto;
+            }
+
+            .video-restart-btn {
+                position: absolute;
+                top: 16px;
+                right: 16px;
+                width: 36px;
+                height: 36px;
+                border: none;
+                border-radius: 50%;
+                background-color: var(--Brand-Neutral-Grey);
+                padding: 6px;
+                cursor: pointer;
+                z-index: 10;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                -webkit-tap-highlight-color: transparent;
+                transition: transform 0.15s ease, opacity 0.2s;
+            }
+
+            .video-restart-btn img {
+                width: 24px;
+                height: 24px;
+                display: block;
+            }
+
+            .video-restart-btn.spinning img {
+                animation: restartSpin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            @keyframes restartSpin {
+                from { transform: rotate(0deg); }
+                to   { transform: rotate(-360deg); }
+            }
+
+            @keyframes fadeInControls {
+                from { opacity: 0; transform: translateY(-6px); }
+                to   { opacity: 1; transform: translateY(0); }
+            }
+
+            @keyframes fadeIn {
+                from { opacity: 0; }
+                to   { opacity: 1; }
+            }
+
+            .controls-visible {
+                visibility: visible !important;
+                animation: fadeInControls 0.4s ease forwards;
+            }
+
+            .video-progress-bar {
+                position: absolute;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                padding: 0 16px 16px;
+                z-index: 10;
+                pointer-events: none;
+            }
+
+            .video-progress-fill-track {
+                width: 100%;
+                height: 4px;
+                border-radius: 2px;
+                background-color: rgba(255, 255, 255, 0.25);
+                overflow: hidden;
+            }
+
+            .video-progress-fill {
+                height: 100%;
+                width: 0%;
+                border-radius: 2px;
+                background-color: rgba(255, 255, 255, 0.50);
+                transition: width 0.25s linear;
+            }
+
+            .video-wrapper .img-load-spinner {
+                position: absolute;
+                pointer-events: none;
+            }
+
+        </style>
+    </head>
+
+<body>
+    <div class="cover-container">
+
+        <header class="header">
+            <a id="closeButton" class="close-btn" style="visibility:hidden;">
+                <img id="uiCloseIcon" src="" alt="Fechar">
+            </a>
+        </header>
+
+        <div class="slider-window" id="slider-window">
+            <div class="slider-track" id="track">
+
+                <!--
+                    INFO-BANNER (reservado para uso futuro):
+                    <div class="info-banner"></div>
+                -->
+
+                <!-- SLIDE 1 -->
+                <div id="slide-1" class="slide">
+                    <div class="slide-content">
+                        <div class="spacer-top"></div>
+                        <div id="tag-slide-1" class="tag-bonus body-2-medium"></div>
+                        <h1 class="title heading-4-regular"></h1>
+                        <div class="video-wrapper" id="wrapSlide1Video" style="display:none;">
+                            <div class="img-load-spinner" id="spinnerSlide1Video"></div>
+                            <video id="uiSlide1Video"
+                                autoplay
+                                muted
+                                playsinline
+                                webkit-playsinline
+                                preload="auto"
+                                style="opacity:0; transition: opacity 0.3s;">
+                            </video>
+                            <button id="btnPlayPauseVideo" class="video-playpause-btn" onclick="togglePlayPause()">
+                                <div class="video-play-circle">
+                                    <img src="https://assets.novucard.com.br/images/icon_play-arrow.svg" alt="Play">
+                                </div>
+                            </button>
+                            <div class="video-controls-group" id="controlsGroup1">
+                                <button id="btnRestartVideo" class="video-restart-btn" onclick="event.stopPropagation(); restartVideo()" style="display:none;">
+                                    <img src="https://assets.novucard.com.br/images/icon_restart.svg" alt="Reiniciar vídeo">
+                                </button>
+                                <button id="btnVolumeVideo1" class="video-restart-btn" onclick="event.stopPropagation(); toggleVolume1()">
+                                    <img id="iconVolume1" src="https://assets.novucard.com.br/images/icon_volume-off.svg" alt="Volume">
+                                </button>
+                            </div>
+                            <div class="video-progress-bar">
+                                <div class="video-progress-fill-track">
+                                    <div class="video-progress-fill" id="videoProgressFill"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="spacer-bottom"></div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 2 -->
+                <div id="slide-2" class="slide">
+                    <div class="slide-content">
+                        <div class="spacer-top"></div>
+                        <div id="tag-slide-2" class="tag-bonus body-2-medium"></div>
+                        <h2 class="title heading-5-regular"></h2>
+                        <div class="img-load-wrapper" id="wrapSlide2Image">
+                            <div class="img-load-spinner"></div>
+                            <img id="uiSlide2Image" src="" alt="" class="hero-image"
+                                style="opacity:0; transition: opacity 0.3s; max-height: 200px; width: auto;">
+                        </div>
+                        <p class="description body-1-regular"></p>
+                        <div class="spacer-bottom"></div>
+                    </div>
+                </div>
+
+                <!-- SLIDE 3 -->
+                <div id="slide-3" class="slide">
+                    <div class="slide-content">
+                        <div class="spacer-top"></div>
+                        <div id="tag-slide-3" class="tag-bonus body-2-medium"></div>
+                        <h1 class="title heading-4-regular"></h1>
+                        <div class="video-wrapper" id="wrapSlide3Video" style="display:none; margin-bottom:0;">
+                            <div class="img-load-spinner" id="spinnerSlide3Video"></div>
+                            <video id="uiSlide3Video"
+                                muted
+                                playsinline
+                                webkit-playsinline
+                                preload="auto"
+                                style="opacity:0; transition: opacity 0.3s;">
+                            </video>
+                            <button id="btnPlayPauseVideo3" class="video-playpause-btn" onclick="togglePlayPause3()">
+                                <div class="video-play-circle video-play-circle-3">
+                                    <img src="https://assets.novucard.com.br/images/icon_play-arrow.svg" alt="Play">
+                                </div>
+                            </button>
+                            <div class="video-controls-group" id="controlsGroup3">
+                                <button id="btnRestartVideo3" class="video-restart-btn" onclick="event.stopPropagation(); restartVideo3()" style="display:none;">
+                                    <img src="https://assets.novucard.com.br/images/icon_restart.svg" alt="Reiniciar vídeo">
+                                </button>
+                                <button id="btnVolumeVideo3" class="video-restart-btn" onclick="event.stopPropagation(); toggleVolume3()">
+                                    <img id="iconVolume3" src="https://assets.novucard.com.br/images/icon_volume-off.svg" alt="Volume">
+                                </button>
+                            </div>
+                            <div class="video-progress-bar">
+                                <div class="video-progress-fill-track">
+                                    <div class="video-progress-fill" id="videoProgressFill3"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <button id="ctaButton3" class="cta-primary extra-button-bold" style="margin-top: 36px;" disabled></button>
+                        <div class="spacer-bottom"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <footer class="footer" id="footer" style="visibility:hidden;">
+            <button id="btn-prev" class="nav-btn hidden" onclick="prevSlide()">
+                <img src="https://assets.novucard.com.br/images/icon_button_arrow-left_active.svg" alt="Voltar">
+            </button>
+
+            <div class="pagination">
+                <div class="dot active" id="dot-0"></div>
+                <div class="dot" id="dot-1"></div>
+                <div class="dot" id="dot-2"></div>
+            </div>
+
+            <button id="btn-next" class="nav-btn" onclick="nextSlide(false)">
+                <img src="https://assets.novucard.com.br/images/icon_button_arrow-right_active.svg" alt="Próximo">
+            </button>
+        </footer>
+
+    </div>
+    <script>
+        // =================================================================
+        // 1. CONFIGURAÇÕES
+        // =================================================================
+        const CONFIG = {
+            actions: {
+                android: 'deeplink',
+                ios: 'deeplink'
+            },
+            closeIcon: "https://assets.novucard.com.br/images/icon_x.svg",
+            slides: [
+                // ----- SLIDE 1 -----
+                {
+                    video:       "https://assets.novucard.com.br/images/video_inapp_onboarding_carousel_1.mp4",
+                    showTag:     false,
+                    title:       "Boas vindas ao novücard!",
+                },
+                // ----- SLIDE 2 -----
+                {
+                    image:       "https://assets.novucard.com.br/images/inapp_onboarding_carousel_slide-2.svg",
+                    showTag:     false,
+                    title:       "O valor que sai do salário cai como pagamento na sua fatura",
+                    description: "Isso acontece <span class=\"body-1-medium\">automaticamente</span> no processamento do seu salário, seguindo o calendário do RH da sua empresa.",
+                },
+                // ----- SLIDE 3 -----
+                {
+                    video:       "https://assets.novucard.com.br/images/video_inapp_onboarding_carousel_2.mp4",
+                    showTag:     false,
+                    title:       "Limite liberado em etapas",
+                    cta: {
+                        label:     "VER MEU LIMITE",
+                        url:       "https://www.novucard.com.br/app/credit-card/payroll-loan",
+                        eventName: "button_clicked_consignado_ver-meu-limite"
+                    },
+                },
+            ],
+            analytics: {
+                eventName:  "Inapp _ Welcome",
+                params: {
+                    isSwipe:            "is-swipe",
+                    clicouCta:          "clicou-cta",
+                    slideViews:         "qtd-visualizacoes-slide-",   // sufixo: número do slide
+                    slideTime:          "tempo-visualizacao-slide-",   // sufixo: número do slide
+                    slideClose:         "clicou-fechar",
+                    restartClicks:      "cliques-restart-video-",      // sufixo: 1 ou 3
+                    pauseClicks:        "cliques-pause-video-",        // sufixo: 1 ou 3
+                    videoSoundTime:     "tempo-com-som-video-",        // sufixo: 1 ou 3
+                    videoLoadTime:      "tempo-download-video-",       // sufixo: 1 ou 3
+                }
+            }
+        };
+
+        // =================================================================
+        // 2. VARIÁVEIS DE CONTROLE
+        // =================================================================
+
+        let currentIndex      = 0;
+        const totalSlides     = CONFIG.slides.length;
+
+        // Analytics
+        let usedSwipe                  = false;
+        let clicouCta                  = false;
+        let clicouFechar               = false;
+        const slideAccumulatedTime     = new Array(totalSlides).fill(0);
+        const slideViewCount           = new Array(totalSlides).fill(0);
+        const videoRestartClicks       = { 1: 0, 3: 0 };
+        const videoPauseClicks         = { 1: 0, 3: 0 };
+        const videoSoundTime           = { 1: 0, 3: 0 };  // tempo assistido com som (segundos)
+        const videoLoadTime            = { 1: null, 3: null }; // tempo de download em segundos
+        let slideEnterTime             = Date.now();
+
+        // Incrementa visualização do slide inicial
+        slideViewCount[0]++;
+
+        // Vídeo
+        let videoWatched  = false;
+        let video3Watched = false;
+        let sharedMuted   = true; // estado de volume compartilhado entre os vídeos
+
+        // Plataforma
+        var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+        // DOM
+        const track        = document.getElementById('track');
+        const sliderWindow = document.getElementById('slider-window');
+        const btnPrev      = document.getElementById('btn-prev');
+        const btnNext      = document.getElementById('btn-next');
+        const footer       = document.querySelector('.footer');
+        const dots = Array.from({ length: totalSlides }, function (_, i) {
+            return document.getElementById('dot-' + i);
+        });
+
+        // =================================================================
+        // 3. INJEÇÃO DE CONFIGURAÇÕES NO HTML
+        // =================================================================
+        function setupTemplate() {
+            document.getElementById('uiCloseIcon').src = CONFIG.closeIcon;
+
+            // Pré-carrega o vídeo do slide 3 em background enquanto o slide 1 é exibido
+            var video3Url = CONFIG.slides[2] && CONFIG.slides[2].video;
+            if (video3Url) {
+                var preload = document.createElement('link');
+                preload.rel = 'preload';
+                preload.as = 'video';
+                preload.href = video3Url;
+                document.head.appendChild(preload);
+            }
+
+            CONFIG.slides.forEach(function (slide, i) {
+                var n = i + 1;
+
+                // Vídeo (slides 1 e 3)
+                if (slide.video !== undefined) {
+                    var videoWrapper = document.getElementById('wrapSlide' + n + 'Video');
+                    var video        = document.getElementById('uiSlide' + n + 'Video');
+                    var spinner      = document.getElementById('spinnerSlide' + n + 'Video');
+                    var videoSlotN = n === 1 ? 1 : 3;
+                    if (video && slide.video) {
+                        if (videoWrapper) videoWrapper.style.display = '';
+                        video.src = slide.video;
+                        var loadStartTime = null;
+                        video.addEventListener('loadstart', function () {
+                            loadStartTime = Date.now();
+                        }, { once: true });
+                        video.addEventListener('canplay', function () {
+                            video.style.opacity = '1';
+                            if (spinner) spinner.style.display = 'none';
+                            if (loadStartTime !== null) {
+                                videoLoadTime[videoSlotN] = parseFloat(((Date.now() - loadStartTime) / 1000).toFixed(1));
+                            }
+                        }, { once: true });
+                        video.addEventListener('error', function () {
+                            video.style.opacity = '1';
+                            if (spinner) spinner.style.display = 'none';
+                        }, { once: true });
+                        video.load();
+                    }
+                    // Barra de progresso + tempo com som
+                    var progressFill = document.getElementById('videoProgressFill' + (n === 1 ? '' : n));
+                    var lastTime = null;
+                    if (video && progressFill) {
+                        video.addEventListener('timeupdate', function () {
+                            if (video.duration) {
+                                progressFill.style.width = (video.currentTime / video.duration * 100) + '%';
+                            }
+                            var now = video.currentTime;
+                            if (lastTime !== null && !video.paused && !video.muted) {
+                                var delta = now - lastTime;
+                                if (delta > 0) videoSoundTime[videoSlotN] += delta;
+                            }
+                            lastTime = now;
+                        });
+                    }
+                    // Slide 1: botão restart + controles aparecem ao fim do vídeo (1ª vez)
+                    if (n === 1) {
+                        var btnRestart = document.getElementById('btnRestartVideo');
+                        if (video && btnRestart) {
+                            video.addEventListener('ended', function () {
+                                videoWatched = true;
+                                btnRestart.style.display = '';
+                                btnRestart.style.animation = 'fadeIn 0.4s ease forwards';
+                                document.getElementById('footer').classList.add('controls-visible');
+                            }, { once: true });
+                        }
+                    }
+                    // Slide 3: botão restart aparece ao fim do vídeo (1ª vez)
+                    if (n === 3) {
+                        var btnRestart3 = document.getElementById('btnRestartVideo3');
+                        if (video && btnRestart3) {
+                            video.addEventListener('ended', function () {
+                                video3Watched = true;
+                                btnRestart3.style.display = '';
+                                btnRestart3.style.animation = 'fadeIn 0.4s ease forwards';
+                                document.getElementById('closeButton').classList.add('controls-visible');
+                                document.getElementById('footer').classList.add('controls-visible');
+                                var cta3 = document.getElementById('ctaButton3');
+                                if (cta3) cta3.disabled = false;
+                            }, { once: true });
+                        }
+                    }
+                } else {
+                    // Imagem (slides 2+)
+                    loadImg('uiSlide' + n + 'Image', slide.image, 'wrapSlide' + n + 'Image');
+                }
+
+                var tag = document.getElementById('tag-slide-' + n);
+                if (tag) {
+                    tag.style.display = slide.showTag ? '' : 'none';
+                    if (slide.tag) tag.textContent = slide.tag;
+                }
+
+                var title = document.querySelector('#slide-' + n + ' .title');
+                if (title && slide.title) title.innerHTML = slide.title;
+
+                var desc = document.querySelector('#slide-' + n + ' .description');
+                if (desc && slide.description) desc.innerHTML = slide.description;
+
+                var info = document.querySelector('#slide-' + n + ' .info-banner');
+                if (info) info.style.display = slide.info ? '' : 'none';
+                var infoSpan = document.querySelector('#slide-' + n + ' .info-banner span');
+                if (infoSpan && slide.info) infoSpan.textContent = slide.info;
+
+                var cta = document.querySelector('#slide-' + n + ' .cta-primary');
+                if (cta && slide.cta) {
+                    cta.textContent = slide.cta.label;
+                    cta.setAttribute('href', slide.cta.url);
+                    cta.setAttribute('data-wzrk-c2a', slide.cta.eventName);
+                }
+            });
+        }
+        // =================================================================
+        // DS INJECTION — não edite esta seção
+        // =================================================================
+        var DS_ID  = 'novucard-ds';
+        var DS_URL = 'https://raw.githubusercontent.com/altbank-repo/assets/main/clevertap/inapps/novucard/DS-novucard.css';
+
+        function initInapp() {
+            setupTemplate();
+        }
+
+        if (!document.getElementById(DS_ID)) {
+            // Standalone (navegador): DS ainda não existe, injeta
+            fetch(DS_URL + '?t=' + Date.now())
+                .then(function (r) {
+                    if (!r.ok) throw new Error('HTTP ' + r.status);
+                    return r.text();
+                })
+                .then(function (css) {
+                    var style = document.createElement('style');
+                    style.id = DS_ID;
+                    style.textContent = css;
+                    document.head.appendChild(style);
+                })
+                .catch(function (e) {
+                    console.error('[Inapp] Falha ao carregar DS:', e);
+                    // Exibe o inapp mesmo assim para facilitar debug no navegador
+                })
+                .finally(function () {
+                    initInapp();
+                });
+        } else {
+            // Produção via bootstrapper: DS já foi injetado, renderiza direto
+            initInapp();
+        }
+
+        function setSharedVolume(muted) {
+            sharedMuted = muted;
+            var v1 = document.getElementById('uiSlide1Video');
+            var v3 = document.getElementById('uiSlide3Video');
+            var icon1 = document.getElementById('iconVolume1');
+            var icon3 = document.getElementById('iconVolume3');
+            var iconSrc = muted
+                ? 'https://assets.novucard.com.br/images/icon_volume-off.svg'
+                : 'https://assets.novucard.com.br/images/icon_volume-on.svg';
+            if (v1) v1.muted = muted;
+            if (v3) v3.muted = muted;
+            if (icon1) icon1.src = iconSrc;
+            if (icon3) icon3.src = iconSrc;
+        }
+
+        function toggleVolume1() {
+            setSharedVolume(!sharedMuted);
+        }
+
+        function toggleVolume3() {
+            setSharedVolume(!sharedMuted);
+        }
+
+        function restartVideo() {
+            var video = document.getElementById('uiSlide1Video');
+            var btn = document.getElementById('btnRestartVideo');
+            if (!video) return;
+            videoRestartClicks[1]++;
+            video.currentTime = 0;
+            video.play();
+            document.querySelector('.video-play-circle').classList.remove('visible');
+            if (btn) {
+                btn.classList.remove('spinning');
+                void btn.offsetWidth;
+                btn.classList.add('spinning');
+                btn.addEventListener('animationend', function () {
+                    btn.classList.remove('spinning');
+                }, { once: true });
+            }
+        }
+
+        function restartVideo3() {
+            var video = document.getElementById('uiSlide3Video');
+            var btn = document.getElementById('btnRestartVideo3');
+            if (!video) return;
+            videoRestartClicks[3]++;
+            video.currentTime = 0;
+            video.play();
+            document.querySelector('.video-play-circle-3').classList.remove('visible');
+            if (btn) {
+                btn.classList.remove('spinning');
+                void btn.offsetWidth;
+                btn.classList.add('spinning');
+                btn.addEventListener('animationend', function () {
+                    btn.classList.remove('spinning');
+                }, { once: true });
+            }
+        }
+
+        function togglePlayPause3() {
+            var video = document.getElementById('uiSlide3Video');
+            var circle = document.querySelector('.video-play-circle-3');
+            if (!video || !circle) return;
+            if (video.paused) {
+                video.play();
+                circle.classList.remove('visible');
+            } else {
+                videoPauseClicks[3]++;
+                video.pause();
+                circle.classList.add('visible');
+            }
+        }
+
+        function togglePlayPause() {
+            var video = document.getElementById('uiSlide1Video');
+            var circle = document.querySelector('.video-play-circle');
+            if (!video || !circle) return;
+            if (video.paused) {
+                video.play();
+                circle.classList.remove('visible');
+            } else {
+                videoPauseClicks[1]++;
+                video.pause();
+                circle.classList.add('visible');
+            }
+        }
+
+        // =================================================================
+        // 5. ANALYTICS
+        // =================================================================
+
+        var ctTrackEvent = function (eventName, props) {
+            if (isIOS) {
+                try {
+                    if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+                        window.webkit.messageHandlers.clevertap.postMessage({
+                            action: 'recordEventWithProps',
+                            event: eventName,
+                            properties: props
+                        });
+                    }
+                } catch (e) { console.error("Erro no tracking iOS", e); }
+            } else {
+                try {
+                    if (window.CleverTap && typeof window.CleverTap.pushEvent === "function") {
+                        window.CleverTap.pushEvent(eventName, JSON.stringify(props));
+                    }
+                } catch (e) { console.error("Erro no tracking Android", e); }
+            }
+        };
+
+        var ctDismiss = function () {
+            try {
+                if (window.webkit && window.webkit.messageHandlers && window.webkit.messageHandlers.clevertap) {
+                    window.webkit.messageHandlers.clevertap.postMessage({ action: 'dismissInAppNotification' });
+                    return true;
+                }
+            } catch (e) { }
+            try {
+                if (window.CleverTap && typeof window.CleverTap.dismissInAppNotification === "function") {
+                    window.CleverTap.dismissInAppNotification();
+                    return true;
+                }
+            } catch (e) { }
+            return false;
+        };
+
+        var ctTriggerAction = function (url, c2a, btnId, isTrackingOnly) {
+            try {
+                if (window.CleverTap && typeof window.CleverTap.triggerInAppAction === "function") {
+                    var kvData = isTrackingOnly ? {} : { "wzrk_dl": url };
+                    var actionJson = { "type": "kv", "kv": kvData };
+                    window.CleverTap.triggerInAppAction(JSON.stringify(actionJson), c2a, btnId);
+                    return true;
+                }
+            } catch (e) { }
+            return false;
+        };
+
+        function loadImg(id, src, wrapperId) {
+            var img = document.getElementById(id);
+            if (!img) return;
+            img.style.opacity = '0';
+            var done = function () {
+                img.style.opacity = '1';
+                if (wrapperId) {
+                    var s = document.querySelector('#' + wrapperId + ' .img-load-spinner');
+                    if (s) s.style.display = 'none';
+                }
+            };
+            img.onload = done;
+            img.onerror = done;
+            img.src = src;
+        }
+
+        // =================================================================
+        // 5. ANALYTICS
+        // =================================================================
+
+        function trackSlideTime() {
+            var elapsed = Math.ceil((Date.now() - slideEnterTime) / 100) / 10;
+            slideAccumulatedTime[currentIndex] += elapsed;
+            slideEnterTime = Date.now();
+        }
+
+        function fireAnalyticsEvent() {
+            trackSlideTime();
+            var props = {};
+            props[CONFIG.analytics.params.isSwipe]    = usedSwipe;
+            props[CONFIG.analytics.params.clicouCta]  = clicouCta;
+            props[CONFIG.analytics.params.slideClose] = clicouFechar;
+            for (var i = 0; i < totalSlides; i++) {
+                props[CONFIG.analytics.params.slideTime  + (i + 1)] = parseFloat(slideAccumulatedTime[i].toFixed(1));
+                props[CONFIG.analytics.params.slideViews + (i + 1)] = slideViewCount[i];
+            }
+            props[CONFIG.analytics.params.restartClicks + '1'] = videoRestartClicks[1];
+            props[CONFIG.analytics.params.restartClicks + '3'] = videoRestartClicks[3];
+            props[CONFIG.analytics.params.pauseClicks   + '1'] = videoPauseClicks[1];
+            props[CONFIG.analytics.params.pauseClicks   + '3'] = videoPauseClicks[3];
+            props[CONFIG.analytics.params.videoSoundTime + '1'] = parseFloat(videoSoundTime[1].toFixed(1));
+            props[CONFIG.analytics.params.videoSoundTime + '3'] = parseFloat(videoSoundTime[3].toFixed(1));
+            props[CONFIG.analytics.params.videoLoadTime  + '1'] = videoLoadTime[1];
+            props[CONFIG.analytics.params.videoLoadTime  + '3'] = videoLoadTime[3];
+            ctTrackEvent(CONFIG.analytics.eventName, props);
+        }
+
+        // =================================================================
+        // 6. CARROSSEL
+        // =================================================================
+
+        function isNextBlocked() {
+            return false;
+        }
+
+        function updateUI() {
+            const slideWidthPct = 100 / totalSlides;
+            const translateVal  = currentIndex * slideWidthPct;
+            if (track) track.style.transform = `translateX(-${translateVal}%)`;
+
+            const isLastSlide = currentIndex === totalSlides - 1;
+
+            // Oculta controles ao entrar no slide 3, ou restaura se já assistiu
+            if (currentIndex === 2) {
+                if (video3Watched) {
+                    document.getElementById('closeButton').classList.add('controls-visible');
+                    document.getElementById('footer').classList.add('controls-visible');
+                } else {
+                    document.getElementById('closeButton').classList.remove('controls-visible');
+                    document.getElementById('closeButton').style.visibility = 'hidden';
+                    document.getElementById('footer').classList.remove('controls-visible');
+                    document.getElementById('footer').style.visibility = 'hidden';
+                }
+            } else {
+                // Slides 1 e 2: X sempre oculto
+                document.getElementById('closeButton').classList.remove('controls-visible');
+                document.getElementById('closeButton').style.visibility = 'hidden';
+            }
+
+            if (btnPrev) btnPrev.classList.toggle('hidden', currentIndex === 0);
+
+            if (btnNext) {
+                btnNext.classList.toggle('hidden', isLastSlide);
+                btnNext.disabled      = isNextBlocked();
+                btnNext.style.opacity = (!isLastSlide && isNextBlocked()) ? '0.3' : '';
+            }
+
+            dots.forEach(function (dot, i) {
+                if (dot) dot.classList.toggle('active', i === currentIndex);
+            });
+        }
+
+        function nextSlide(isSwipe) {
+            if (currentIndex === totalSlides - 1) return;
+            if (!isNextBlocked()) {
+                trackSlideTime();
+                if (currentIndex === 0) {
+                    var video = document.getElementById('uiSlide1Video');
+                    if (video && !video.paused) {
+                        video.pause();
+                        document.querySelector('.video-play-circle').classList.add('visible');
+                    }
+                }
+                // Ao entrar no slide 3, aplica o estado de volume compartilhado e dá play apenas na 1ª vez
+                if (currentIndex === 1) {
+                    var v3 = document.getElementById('uiSlide3Video');
+                    if (v3) {
+                        v3.muted = sharedMuted;
+                        var icon3 = document.getElementById('iconVolume3');
+                        if (icon3) icon3.src = sharedMuted
+                            ? 'https://assets.novucard.com.br/images/icon_volume-off.svg'
+                            : 'https://assets.novucard.com.br/images/icon_volume-on.svg';
+                        if (!video3Watched && v3.paused) v3.play();
+                    }
+                }
+                currentIndex++;
+                slideViewCount[currentIndex]++;
+                updateUI();
+            }
+        }
+
+        function prevSlide() {
+            if (currentIndex > 0) {
+                trackSlideTime();
+                if (currentIndex === 2) {
+                    var video3 = document.getElementById('uiSlide3Video');
+                    if (video3 && !video3.paused) {
+                        video3.pause();
+                        document.querySelector('.video-play-circle-3').classList.add('visible');
+                    }
+                    if (video3Watched) {
+                        document.getElementById('footer').classList.add('controls-visible');
+                    }
+                    // X some ao voltar para slide 2
+                    document.getElementById('closeButton').classList.remove('controls-visible');
+                    document.getElementById('closeButton').style.visibility = 'hidden';
+                }
+                currentIndex--;
+                slideViewCount[currentIndex]++;
+                updateUI();
+            }
+        }
+
+        // Touch / swipe
+        let touchStartX = 0;
+        let touchEndX   = 0;
+
+        if (sliderWindow) {
+            // Bloqueia scroll vertical durante swipe — necessário no iOS
+            // No Android omitimos o passive:false pois pode causar crash em algumas WebViews
+            if (isIOS) {
+                sliderWindow.addEventListener('touchmove', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }, { passive: false });
+            }
+
+            sliderWindow.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            sliderWindow.addEventListener('touchend', e => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, { passive: true });
+        }
+
+        function handleSwipe() {
+            const threshold = 50;
+            if (currentIndex === 0 && !videoWatched)  return;
+            if (currentIndex === 2 && !video3Watched) return;
+            if (touchEndX < touchStartX - threshold) {
+                usedSwipe = true;
+                var video = document.getElementById('uiSlide1Video');
+                if (video && !video.paused) {
+                    video.pause();
+                    document.querySelector('.video-play-circle').classList.add('visible');
+                }
+                nextSlide(true);
+            }
+            if (touchEndX > touchStartX + threshold) {
+                usedSwipe = true;
+                prevSlide();
+            }
+        }
+
+        // =================================================================
+        // 7. LISTENERS
+        // =================================================================
+
+        // Bloqueia swipe horizontal de dismiss do iOS no container inteiro
+        if (isIOS) {
+            var coverContainer = document.querySelector('.cover-container');
+            if (coverContainer) {
+                var touchStartXIOS = 0;
+                var touchStartYIOS = 0;
+                coverContainer.addEventListener('touchstart', function (e) {
+                    touchStartXIOS = e.touches[0].clientX;
+                    touchStartYIOS = e.touches[0].clientY;
+                }, { passive: true });
+                coverContainer.addEventListener('touchmove', function (e) {
+                    var dx = Math.abs(e.touches[0].clientX - touchStartXIOS);
+                    var dy = Math.abs(e.touches[0].clientY - touchStartYIOS);
+                    if (dx > dy) e.preventDefault();
+                }, { passive: false });
+            }
+        }
+
+        var el_closeBtn = document.getElementById("closeButton"); if (el_closeBtn) el_closeBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            clicouFechar = true;
+            fireAnalyticsEvent();
+            ctDismiss();
+        });
+
+        // Slide 2 — botão VALIDAR AGORA
+        var el_ctaBtn = document.getElementById("ctaButton"); if (el_ctaBtn) el_ctaBtn.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            clicouCta = true;
+            var url = this.getAttribute("href");
+            var c2a = this.getAttribute("data-wzrk-c2a");
+            var actionType = isIOS ? CONFIG.actions.ios : CONFIG.actions.android;
+
+            fireAnalyticsEvent();
+
+            if (isIOS) {
+                if (actionType === 'external') {
+                    var newWindow = window.open(url, '_blank');
+                    if (!newWindow || newWindow.closed) { window.location.href = url; }
+                    setTimeout(function () {
+                        window.location.href = "wzrk://?wzrk_c2a=" + encodeURIComponent(c2a);
+                    }, 1000);
+                } else if (actionType === 'close') {
+                    window.location.href = "wzrk://?wzrk_c2a=" + encodeURIComponent(c2a);
+                } else {
+                    if (ctTriggerAction(url, c2a, "ctaButton", false)) {
+                        setTimeout(function () { ctDismiss(); }, 150);
+                    } else {
+                        setTimeout(function () { window.location.href = url; }, 150);
+                        setTimeout(function () { ctDismiss(); }, 300);
+                    }
+                }
+            } else {
+                if (actionType === 'external') {
+                    ctTriggerAction(url, c2a, "ctaButton", true);
+                    window.location.href = url;
+                    setTimeout(function () { ctDismiss(); }, 2000);
+                } else if (actionType === 'deeplink') {
+                    if (ctTriggerAction(url, c2a, "ctaButton", false)) {
+                        setTimeout(function () { ctDismiss(); }, 150);
+                    }
+                } else {
+                    ctTriggerAction(url, c2a, "ctaButton", true);
+                    setTimeout(function () { ctDismiss(); }, 150);
+                }
+            }
+        });
+
+        // Slide 3 — botão VER MEU LIMITE
+        var el_ctaBtn3 = document.getElementById("ctaButton3"); if (el_ctaBtn3) el_ctaBtn3.addEventListener("click", function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            clicouCta = true;
+            var url = this.getAttribute("href");
+            var c2a = this.getAttribute("data-wzrk-c2a");
+            var actionType = isIOS ? CONFIG.actions.ios : CONFIG.actions.android;
+
+            fireAnalyticsEvent();
+
+            if (isIOS) {
+                if (actionType === 'external') {
+                    var newWindow = window.open(url, '_blank');
+                    if (!newWindow || newWindow.closed) { window.location.href = url; }
+                    setTimeout(function () {
+                        window.location.href = "wzrk://?wzrk_c2a=" + encodeURIComponent(c2a);
+                    }, 1000);
+                } else if (actionType === 'close') {
+                    window.location.href = "wzrk://?wzrk_c2a=" + encodeURIComponent(c2a);
+                } else {
+                    if (ctTriggerAction(url, c2a, "ctaButton3", false)) {
+                        setTimeout(function () { ctDismiss(); }, 150);
+                    } else {
+                        setTimeout(function () { window.location.href = url; }, 150);
+                        setTimeout(function () { ctDismiss(); }, 300);
+                    }
+                }
+            } else {
+                if (actionType === 'external') {
+                    ctTriggerAction(url, c2a, "ctaButton3", true);
+                    window.location.href = url;
+                    setTimeout(function () { ctDismiss(); }, 2000);
+                } else if (actionType === 'deeplink') {
+                    if (ctTriggerAction(url, c2a, "ctaButton3", false)) {
+                        setTimeout(function () { ctDismiss(); }, 150);
+                    }
+                } else {
+                    ctTriggerAction(url, c2a, "ctaButton3", true);
+                    setTimeout(function () { ctDismiss(); }, 150);
+                }
+            }
+        });
+    </script>
+</body>
+
+</html>
